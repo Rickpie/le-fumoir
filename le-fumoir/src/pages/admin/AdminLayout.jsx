@@ -9,6 +9,7 @@ const adminNav = [
   { path: '/admin/commandes', label: 'Commandes', icon: '📦' },
   { path: '/admin/packs', label: 'Packs', icon: '📦' },
   { path: '/admin/fichiers', label: 'Fichiers', icon: '📄' },
+  { path: '/admin/contact', label: 'Contact', icon: '✉️' },
 ]
 
 function AdminLayout() {

@@ -17,6 +17,7 @@ import AdminPacks from './pages/admin/AdminPacks'
 import AdminFichiers from './pages/admin/AdminFichiers'
 import ProduitDetail from './pages/ProduitDetail'
 import Panier from './pages/Panier'
+import AdminContact from './pages/admin/AdminContact'
 
 
 
@@ -47,6 +48,7 @@ function App() {
           <Route path="tutoriels" element={<AdminTutoriels />} />
           <Route path="packs" element={<AdminPacks />} />
           <Route path="fichiers" element={<AdminFichiers />} />
+          <Route path="contact" element={<AdminContact />} />
         </Route>
       </Route>
     </Routes>
