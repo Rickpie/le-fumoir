@@ -75,10 +75,18 @@ function Sidebar() {
 
         {utilisateur ? (
           <>
-            <div className="flex items-center gap-3 px-4 py-2.5 text-sm border-l-2 border-transparent text-amber-300/70">
+            <NavLink
+              to="/profil"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-2.5 text-sm transition-all border-l-2 ` +
+                (isActive
+                  ? 'border-yellow-500 text-amber-100 bg-yellow-500/10'
+                  : 'border-transparent text-amber-300/70 hover:text-amber-100 hover:bg-white/5')
+              }
+            >
               <span>👤</span>
               <span className="truncate">{profil?.prenom || 'Mon compte'}</span>
-            </div>
+            </NavLink>
             <button
               onClick={handleDeconnexion}
               className="flex items-center gap-3 px-4 py-2.5 text-sm border-l-2 border-transparent text-amber-300/70 hover:text-amber-100 hover:bg-white/5 transition-all text-left"

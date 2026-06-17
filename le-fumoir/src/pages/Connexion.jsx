@@ -66,6 +66,10 @@ function Connexion() {
         >
           {chargement ? 'Connexion...' : 'Se connecter'}
         </button>
+
+        <Link to="/mot-de-passe-oublie" className="text-xs text-center" style={{ color: '#a07050' }}>
+          Mot de passe oublié ?
+        </Link>
       </form>
 
       <p className="mt-4 text-sm" style={{ color: '#7a4010' }}>

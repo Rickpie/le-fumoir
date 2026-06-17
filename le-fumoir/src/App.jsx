@@ -18,6 +18,9 @@ import AdminFichiers from './pages/admin/AdminFichiers'
 import ProduitDetail from './pages/ProduitDetail'
 import Panier from './pages/Panier'
 import AdminContact from './pages/admin/AdminContact'
+import MotDePasseOublie from './pages/MotDePasseOublie'
+import ReinitialiserMotDePasse from './pages/ReinitialiserMotDePasse'
+import Profil from './pages/Profil'
 
 
 
@@ -33,6 +36,9 @@ function App() {
         <Route path="inscription" element={<Inscription />} />
         <Route path="produit/:id" element={<ProduitDetail />} />
         <Route path="panier" element={<Panier />} />
+        <Route path="mot-de-passe-oublie" element={<MotDePasseOublie />} />
+        <Route path="reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
+        <Route path="profil" element={<Profil />} />
         <Route
           path="admin"
           element={
