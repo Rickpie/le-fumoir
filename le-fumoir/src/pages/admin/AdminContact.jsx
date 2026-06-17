@@ -9,6 +9,7 @@ function AdminContact() {
   const [messages, setMessages] = useState([])
   const [chargement, setChargement] = useState(true)
   const [enregistrement, setEnregistrement] = useState(false)
+  const [succes, setSucces] = useState(false)
 
   useEffect(() => {
     chargerDonnees()
@@ -29,11 +30,19 @@ function AdminContact() {
 
   async function enregistrer() {
     setEnregistrement(true)
-    await supabase.from('contact_page').update({
+    setSucces(false)
+    const { error } = await supabase.from('contact_page').update({
       contenu,
       email_contact: emailContact,
       updated_at: new Date().toISOString(),
     }).eq('id', pageId)
+
+    if (error) {
+      alert('Erreur lors de l\'enregistrement : ' + error.message)
+    } else {
+      setSucces(true)
+      setTimeout(() => setSucces(false), 3000)
+    }
     setEnregistrement(false)
   }
 
@@ -67,8 +76,10 @@ function AdminContact() {
 
         <div>
           <label className="block text-xs mb-1 font-medium" style={labelStyle}>Texte explicatif</label>
-          <EditeurTexte valeur={contenu} onChange={setContenu} />
+          <EditeurTexte contenu={contenu} onChange={setContenu} />
         </div>
+
+        {succes && <p className="text-xs" style={{ color: '#3B6D11' }}>✓ Enregistré</p>}
 
         <button onClick={enregistrer} disabled={enregistrement}
           className="px-4 py-2 rounded-lg text-sm font-medium self-start"
