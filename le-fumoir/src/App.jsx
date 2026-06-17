@@ -1,12 +1,15 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
+import RouteProtegee from './components/RouteProtegee'
 import Accueil from './pages/Accueil'
 import Boutique from './pages/Boutique'
 import Tutoriels from './pages/Tutoriels'
 import Contact from './pages/Contact'
-import Admin from './pages/Admin'
 import Connexion from './pages/Connexion'
 import Inscription from './pages/Inscription'
+import Admin from './pages/Admin'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminOptions from './pages/admin/AdminOptions'
 
 function App() {
   return (
@@ -16,9 +19,20 @@ function App() {
         <Route path="boutique" element={<Boutique />} />
         <Route path="tutoriels" element={<Tutoriels />} />
         <Route path="contact" element={<Contact />} />
-        <Route path="admin" element={<Admin />} />
         <Route path="connexion" element={<Connexion />} />
         <Route path="inscription" element={<Inscription />} />
+
+        <Route
+          path="admin"
+          element={
+            <RouteProtegee>
+              <AdminLayout />
+            </RouteProtegee>
+          }
+        >
+          <Route index element={<Admin />} />
+          <Route path="options" element={<AdminOptions />} />
+        </Route>
       </Route>
     </Routes>
   )

@@ -9,18 +9,21 @@ export function AuthProvider({ children }) {
   const [chargement, setChargement] = useState(true)
 
   useEffect(() => {
-    // Récupère la session active
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUtilisateur(session?.user ?? null)
-      if (session?.user) chargerProfil(session.user.id)
+      if (session?.user) {
+        await chargerProfil(session.user.id)
+      }
       setChargement(false)
     })
 
-    // Écoute les changements d'auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUtilisateur(session?.user ?? null)
-      if (session?.user) chargerProfil(session.user.id)
-      else setProfil(null)
+      if (session?.user) {
+        await chargerProfil(session.user.id)
+      } else {
+        setProfil(null)
+      }
     })
 
     return () => subscription.unsubscribe()
