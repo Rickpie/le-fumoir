@@ -86,7 +86,7 @@ function AdminProduits() {
     setForm({
       nom: '', description: '', prix: '', photo_url: '', categorie_id: '',
       epicesSelectionnees: epices.map(e => e.id),
-      insertsSelectionnes: inserts.map(i => i.id),
+      insertsSelectionnes: [],
     })
     setFormulaireOuvert(true)
   }
