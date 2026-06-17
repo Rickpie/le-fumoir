@@ -47,7 +47,7 @@ function Contact() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-medium mb-6" style={{ color: '#3d1e06' }}>Contact</h1>
+      <h1 className="text-2xl font-medium mb-6" style={{ color: '#3d1e06' }}>Infos & Contact</h1>
 
       <div className="bg-white rounded-2xl border shadow-sm p-6 sm:p-8 mb-8" style={{ borderColor: '#d6bfa0' }}>
         {contenu ? (

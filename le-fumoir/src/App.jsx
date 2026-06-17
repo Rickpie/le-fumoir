@@ -21,6 +21,7 @@ import AdminContact from './pages/admin/AdminContact'
 import MotDePasseOublie from './pages/MotDePasseOublie'
 import ReinitialiserMotDePasse from './pages/ReinitialiserMotDePasse'
 import Profil from './pages/Profil'
+import AdminMessages from './pages/admin/AdminMessages'
 
 
 
@@ -55,6 +56,7 @@ function App() {
           <Route path="packs" element={<AdminPacks />} />
           <Route path="fichiers" element={<AdminFichiers />} />
           <Route path="contact" element={<AdminContact />} />
+          <Route path="messages" element={<AdminMessages />} />
         </Route>
       </Route>
     </Routes>
