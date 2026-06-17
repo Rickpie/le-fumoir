@@ -83,7 +83,11 @@ function AdminProduits() {
 
   function ouvrirNouveauProduit() {
     setProduitEnEdition(null)
-    setForm({ nom: '', description: '', prix: '', photo_url: '', categorie_id: '', epicesSelectionnees: [], insertsSelectionnes: [] })
+    setForm({
+      nom: '', description: '', prix: '', photo_url: '', categorie_id: '',
+      epicesSelectionnees: epices.map(e => e.id),
+      insertsSelectionnes: inserts.map(i => i.id),
+    })
     setFormulaireOuvert(true)
   }
 

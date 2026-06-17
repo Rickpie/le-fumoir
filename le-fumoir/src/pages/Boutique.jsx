@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
+import { useNavigate } from 'react-router-dom'
 
 function Boutique() {
   const [produits, setProduits] = useState([])
   const [categories, setCategories] = useState([])
   const [categorieActive, setCategorieActive] = useState(null)
   const [chargement, setChargement] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     chargerDonnees()
@@ -96,7 +98,7 @@ function Boutique() {
           {produitsFiltres.map(produit => (
             <div
               key={produit.id}
-              onClick={() => incrementerClics(produit.id)}
+              onClick={() => { incrementerClics(produit.id); navigate(`/produit/${produit.id}`) }}
               className="bg-white rounded-xl border cursor-pointer group"
               style={{
                 borderColor: '#d6bfa0',

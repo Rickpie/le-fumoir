@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { usePanier } from '../../context/PanierContext'
 
 const navItems = [
   { path: '/boutique', label: 'Boutique', icon: '🛒' },
@@ -9,6 +10,7 @@ const navItems = [
 
 function Sidebar() {
   const { utilisateur, profil, seDeconnecter } = useAuth()
+  const { nombreArticles } = usePanier()
   const navigate = useNavigate()
 
   async function handleDeconnexion() {
@@ -68,7 +70,7 @@ function Sidebar() {
         >
           <span>🛍️</span>
           <span>Panier</span>
-          <span className="ml-auto text-xs bg-yellow-500 text-amber-900 font-medium rounded-full px-2 py-0.5">0</span>
+          <span className="ml-auto text-xs bg-yellow-500 text-amber-900 font-medium rounded-full px-2 py-0.5">{nombreArticles}</span>
         </NavLink>
 
         {utilisateur ? (

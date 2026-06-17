@@ -15,6 +15,7 @@ import AdminProduits from './pages/admin/AdminProduits'
 import AdminTutoriels from './pages/admin/AdminTutoriels'
 import AdminPacks from './pages/admin/AdminPacks'
 import AdminFichiers from './pages/admin/AdminFichiers'
+import ProduitDetail from './pages/ProduitDetail'
 
 
 
@@ -28,7 +29,7 @@ function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="connexion" element={<Connexion />} />
         <Route path="inscription" element={<Inscription />} />
-
+        <Route path="produit/:id" element={<ProduitDetail />} />
         <Route
           path="admin"
           element={
