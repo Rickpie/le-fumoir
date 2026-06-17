@@ -21,9 +21,18 @@ function SelectMultiple({ label, options, selectionnes, onToggle, afficherPrix =
     <div ref={ref} className="relative">
       <label className="block text-xs mb-1 font-medium" style={labelStyle}>{label}</label>
       <button type="button" onClick={() => setOuvert(!ouvert)}
-        className="w-full px-3 py-2 rounded-lg border text-sm outline-none text-left flex items-center justify-between"
+        className="w-full px-3 py-2 rounded-lg border text-sm outline-none text-left flex items-center justify-between gap-2"
         style={inputStyle}>
-        <span>{selectionnes.length === 0 ? 'Aucun sélectionné' : `${selectionnes.length} sélectionné(s)`}</span>
+        <span className="flex flex-wrap gap-1 flex-1">
+          {selectionnes.length === 0
+            ? <span style={{ color: '#a07050' }}>Aucun sélectionné</span>
+            : options.filter(o => selectionnes.includes(o.id)).map(o => (
+                <span key={o.id} className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+                  {o.nom || o.titre}
+                </span>
+              ))
+          }
+        </span>
         <span>{ouvert ? '▲' : '▼'}</span>
       </button>
 
@@ -202,6 +211,7 @@ function AdminPacks() {
             options={tutoriels}
             selectionnes={form.tutorielsSelectionnes}
             onToggle={id => toggle(tutoriels, id, 'tutorielsSelectionnes')}
+            afficherPrix={false}
           />
 
           <SelectMultiple
@@ -216,6 +226,7 @@ function AdminPacks() {
             options={fichiers}
             selectionnes={form.fichiersSelectionnes}
             onToggle={id => toggle(fichiers, id, 'fichiersSelectionnes')}
+            afficherPrix={false}
           />
 
           <div className="flex gap-2 mt-2">
