@@ -10,7 +10,7 @@ function AdminTutoriels() {
     const [tutoEnEdition, setTutoEnEdition] = useState(null)
 
     const [form, setForm] = useState({
-        titre: '', sous_titre: '', contenu: '', photo_url: '', gratuit: true,
+        titre: '', sous_titre: '', contenu: '', photo_url: '', gratuit: true, prix: '',
     })
 
     useEffect(() => {
@@ -25,7 +25,7 @@ function AdminTutoriels() {
 
     function ouvrirNouveau() {
         setTutoEnEdition(null)
-        setForm({ titre: '', sous_titre: '', contenu: '', photo_url: '', gratuit: true })
+        setForm({ titre: '', sous_titre: '', contenu: '', photo_url: '', gratuit: true, prix: '' })
         setFormulaireOuvert(true)
     }
 
@@ -37,6 +37,7 @@ function AdminTutoriels() {
             contenu: tuto.contenu || '',
             photo_url: tuto.photo_url || '',
             gratuit: tuto.gratuit,
+            prix: tuto.prix || '',
         })
         setFormulaireOuvert(true)
     }
@@ -49,6 +50,7 @@ function AdminTutoriels() {
             contenu: form.contenu,
             photo_url: form.photo_url,
             gratuit: form.gratuit,
+            prix: form.gratuit ? 0 : (parseFloat(form.prix) || 0),
         }
 
         if (tutoEnEdition) {
@@ -118,8 +120,16 @@ function AdminTutoriels() {
 
                     <label className="flex items-center gap-2 text-sm" style={{ color: '#3d1e06' }}>
                         <input type="checkbox" checked={form.gratuit} onChange={e => setForm({ ...form, gratuit: e.target.checked })} />
-                        Tutoriel gratuit (sinon réservé à un pack payant)
+                        Tutoriel gratuit
                     </label>
+
+                    {!form.gratuit && (
+                        <div>
+                            <label className="block text-xs mb-1 font-medium" style={labelStyle}>Prix de vente à l'unité (€)</label>
+                            <input type="number" step="0.01" value={form.prix} onChange={e => setForm({ ...form, prix: e.target.value })}
+                                className="w-full px-3 py-2 rounded-lg border text-sm outline-none" style={inputStyle} />
+                        </div>
+                    )}
 
                     <div className="flex gap-2 mt-2">
                         <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium"
@@ -145,7 +155,7 @@ function AdminTutoriels() {
                                 <span className="text-sm font-medium" style={{ color: '#3d1e06' }}>{t.titre}</span>
                                 <span className="text-xs ml-2 px-2 py-0.5 rounded-full"
                                     style={t.gratuit ? { background: '#eaf3de', color: '#3B6D11' } : { background: '#fce0a0', color: '#6b3c06' }}>
-                                    {t.gratuit ? 'Gratuit' : 'Payant'}
+                                    {t.gratuit ? 'Gratuit' : `Payant — ${t.prix} €`}
                                 </span>
                             </div>
                         </div>

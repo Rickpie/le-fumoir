@@ -7,6 +7,7 @@ const adminNav = [
   { path: '/admin/options', label: 'Épices & Inserts', icon: '🧂' },
   { path: '/admin/tutoriels', label: 'Tutoriels', icon: '📖' },
   { path: '/admin/commandes', label: 'Commandes', icon: '📦' },
+  { path: '/admin/packs', label: 'Packs', icon: '📦' },
 ]
 
 function AdminLayout() {

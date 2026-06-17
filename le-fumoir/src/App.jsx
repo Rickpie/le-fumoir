@@ -13,6 +13,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminOptions from './pages/admin/AdminOptions'
 import AdminProduits from './pages/admin/AdminProduits'
 import AdminTutoriels from './pages/admin/AdminTutoriels'
+import AdminPacks from './pages/admin/AdminPacks'
 
 
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="produits" element={<AdminProduits />} />
           <Route path="tutoriels" element={<AdminTutoriels />} />
+          <Route path="packs" element={<AdminPacks />} />
         </Route>
       </Route>
     </Routes>
