@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import RouteProtegee from './components/RouteProtegee'
+import AdminCategories from './pages/admin/AdminCategories'
 import Accueil from './pages/Accueil'
 import Boutique from './pages/Boutique'
 import Tutoriels from './pages/Tutoriels'
@@ -10,6 +11,7 @@ import Inscription from './pages/Inscription'
 import Admin from './pages/Admin'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminOptions from './pages/admin/AdminOptions'
+
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
         >
           <Route index element={<Admin />} />
           <Route path="options" element={<AdminOptions />} />
+          <Route path="categories" element={<AdminCategories />} />
         </Route>
       </Route>
     </Routes>

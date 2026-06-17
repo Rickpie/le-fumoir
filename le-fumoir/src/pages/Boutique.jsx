@@ -22,7 +22,12 @@ function Boutique() {
       .select('*')
       .eq('visible', true)
 
-    setCategories(cats || [])
+    // On ne garde que les catégories qui ont au moins un produit visible
+    const categoriesAvecProduits = (cats || []).filter(cat =>
+      (prods || []).some(p => p.categorie_id === cat.id)
+    )
+
+    setCategories(categoriesAvecProduits)
     setProduits(prods || [])
     setChargement(false)
   }
