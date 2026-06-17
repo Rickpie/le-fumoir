@@ -49,26 +49,30 @@ function Contact() {
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-medium mb-6" style={{ color: '#3d1e06' }}>Contact</h1>
 
-      {contenu ? (
-        <div
-          className="prose prose-base max-w-none article-tutoriel mb-8"
-          style={{ color: '#3d1e06' }}
-          dangerouslySetInnerHTML={{ __html: contenu }}
-        />
-      ) : (
-        <p className="text-sm mb-8" style={{ color: '#7a4010' }}>
-          Une question sur nos produits ou notre fonctionnement ? N'hésitez pas à nous contacter.
-        </p>
-      )}
+      <div className="bg-white rounded-2xl border shadow-sm p-6 sm:p-8 mb-8" style={{ borderColor: '#d6bfa0' }}>
+        {contenu ? (
+          <div
+            className="prose prose-base max-w-none article-tutoriel"
+            style={{ color: '#3d1e06' }}
+            dangerouslySetInnerHTML={{ __html: contenu }}
+          />
+        ) : (
+          <p className="text-sm" style={{ color: '#7a4010' }}>
+            Une question sur nos produits ou notre fonctionnement ? N'hésitez pas à nous contacter.
+          </p>
+        )}
 
-      {emailContact && (
-        <p className="text-sm mb-8" style={{ color: '#7a4010' }}>
-          📧 Vous pouvez aussi nous écrire directement à{' '}
-          <a href={`mailto:${emailContact}`} className="font-medium" style={{ color: '#b06010' }}>
-            {emailContact}
-          </a>
-        </p>
-      )}
+        {emailContact && (
+          <div className="mt-6 pt-6 border-t" style={{ borderColor: '#d6bfa0' }}>
+            <p className="text-sm" style={{ color: '#7a4010' }}>
+              📧 Vous pouvez aussi nous écrire directement à{' '}
+              <a href={`mailto:${emailContact}`} className="font-medium" style={{ color: '#b06010' }}>
+                {emailContact}
+              </a>
+            </p>
+          </div>
+        )}
+      </div>
 
       <div className="border-t mb-8" style={{ borderColor: '#d6bfa0' }} />
 
