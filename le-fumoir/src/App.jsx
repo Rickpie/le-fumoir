@@ -11,6 +11,8 @@ import Inscription from './pages/Inscription'
 import Admin from './pages/Admin'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminOptions from './pages/admin/AdminOptions'
+import AdminProduits from './pages/admin/AdminProduits'
+
 
 
 function App() {
@@ -35,6 +37,7 @@ function App() {
           <Route index element={<Admin />} />
           <Route path="options" element={<AdminOptions />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="produits" element={<AdminProduits />} />
         </Route>
       </Route>
     </Routes>
