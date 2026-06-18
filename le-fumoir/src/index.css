@@ -54,3 +54,117 @@
 .article-tutoriel strong {
   color: #5a2e0e;
 }
+
+.accueil-hero {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.accueil-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(240, 168, 48, 0.35), transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(200, 120, 74, 0.25), transparent 55%),
+    repeating-linear-gradient(115deg, rgba(90, 46, 14, 0.06) 0px, rgba(90, 46, 14, 0.06) 2px, transparent 2px, transparent 14px),
+    linear-gradient(160deg, #2e1506 0%, #1a1410 60%, #2e1506 100%);
+  animation: accueilFondApparition 1.4s ease-out both;
+  transform-origin: center;
+}
+
+.accueil-contenu {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+}
+
+.accueil-eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f0a830;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.accueil-titre {
+  font-size: 2.4rem;
+  line-height: 1.15;
+  font-weight: 600;
+  color: #fdf0d0;
+  margin-bottom: 1.25rem;
+}
+
+.accueil-soustitre {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #e8cba0;
+  margin-bottom: 2rem;
+}
+
+.accueil-bouton {
+  display: inline-block;
+  padding: 0.85rem 1.75rem;
+  border-radius: 0.75rem;
+  background: #f0a830;
+  color: #2e1506;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.accueil-bouton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(240, 168, 48, 0.35);
+}
+
+.anim {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: accueilTexteApparition 0.8s ease-out both;
+}
+
+.anim-1 { animation-delay: 0.15s; }
+.anim-2 { animation-delay: 0.35s; }
+.anim-3 { animation-delay: 0.55s; }
+.anim-4 { animation-delay: 0.75s; }
+
+@keyframes accueilTexteApparition {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes accueilFondApparition {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim, .accueil-fond {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .accueil-titre {
+    font-size: 1.8rem;
+  }
+}

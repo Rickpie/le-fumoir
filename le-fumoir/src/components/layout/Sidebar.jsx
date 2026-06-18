@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { usePanier } from '../../context/PanierContext'
 
@@ -22,10 +22,18 @@ function Sidebar() {
     <aside className="w-48 min-h-screen flex flex-col" style={{ background: '#5a2e0e' }}>
 
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-white/10">
-        <div className="text-lg font-medium" style={{ color: '#fdf0d0' }}>Le Fumoir</div>
-        <div className="text-xs mt-1 tracking-widest" style={{ color: '#d4a97a' }}>Artisan fumeur</div>
-      </div>
+      <Link to="/" className="px-4 py-5 border-b border-white/10 flex justify-center">
+        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style={{ width: '120px', height: '120px' }}>
+          <circle cx="200" cy="200" r="185" fill="#fdf0d0" stroke="#1a1410" strokeWidth="6" />
+          <circle cx="200" cy="200" r="170" fill="none" stroke="#1a1410" strokeWidth="1.5" />
+          <text x="200" y="190" textAnchor="middle" fontFamily="Georgia, serif" fontSize="92" fontWeight="700" fill="#1a1410">PC</text>
+          <text x="100" y="265" fontFamily="Georgia, serif" fontSize="40" fontWeight="500" fill="#1a1410">Le Fumo</text>
+          <text x="266" y="265" fontFamily="Georgia, serif" fontSize="40" fontWeight="500" fill="#1a1410">r</text>
+          <rect x="260" y="247" width="4" height="18" rx="1.6" fill="#1a1410" />
+          <path d="M262 244 Q256 232 262 223 Q268 232 262 244 Z" fill="#c8784a" />
+          <path d="M262 239 Q259 232 262 227 Q265 232 262 239 Z" fill="#f0a830" />
+        </svg>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex flex-col mt-3 flex-1">
