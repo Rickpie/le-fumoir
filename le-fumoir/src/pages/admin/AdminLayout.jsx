@@ -3,61 +3,166 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { supabase } from '../../supabase'
 
 const adminNav = [
-  { path: '/admin', label: 'Dashboard', icon: '📊' },
-  { path: '/admin/produits', label: 'Produits', icon: '🥩' },
-  { path: '/admin/categories', label: 'Catégories', icon: '🏷️' },
-  { path: '/admin/options', label: 'Épices & Inserts', icon: '🧂' },
-  { path: '/admin/tutoriels', label: 'Tutoriels', icon: '📖' },
-  { path: '/admin/commandes', label: 'Commandes', icon: '📦' },
-  { path: '/admin/packs', label: 'Packs', icon: '📦' },
-  { path: '/admin/fichiers', label: 'Fichiers', icon: '📄' },
-  { path: '/admin/contact', label: 'Contact', icon: '✉️' },
-  { path: '/admin/messages', label: 'Messages', icon: '📬' },
+  {
+    groupe: null,
+    items: [
+      { path: '/admin', label: 'Dashboard', icon: '📊', exact: true },
+    ],
+  },
+  {
+    groupe: 'Boutique',
+    items: [
+      { path: '/admin/mise-en-vente', label: 'Mise en vente', icon: '🆕' },
+      { path: '/admin/produits', label: 'Ventes en cours', icon: '🥩' },
+      { path: '/admin/commandes', label: 'Commandes', icon: '📦' },
+      { path: '/admin/packs', label: 'Packs', icon: '🎁' },
+    ],
+  },
+  {
+    groupe: 'Contenu du site',
+    items: [
+      { path: '/admin/accueil', label: "Page d'accueil", icon: '🏠' },
+      { path: '/admin/doc-sechage', label: 'Guide séchage', icon: '📋' },
+      { path: '/admin/tutoriels', label: 'Tutoriels', icon: '📖' },
+      { path: '/admin/fichiers', label: 'Fichiers', icon: '📄' },
+    ],
+  },
+  {
+    groupe: 'Configuration',
+    items: [
+      { path: '/admin/categories', label: 'Catégories', icon: '🏷️' },
+      { path: '/admin/options', label: 'Épices & Inserts', icon: '🧂' },
+      { path: '/admin/contact', label: 'Infos & Contact', icon: '✉️' },
+      { path: '/admin/parametres-facturation', label: 'Facturation', icon: '🧾' },
+    ],
+  },
+  {
+    groupe: null,
+    items: [
+      { path: '/admin/messages', label: 'Messages', icon: '📬', badge: true },
+    ],
+  },
 ]
 
 function AdminLayout() {
   const [messagesNonLus, setMessagesNonLus] = useState(0)
+  const [sidebarOuverte, setSidebarOuverte] = useState(false)
 
   useEffect(() => {
     chargerCompteur()
   }, [])
 
   async function chargerCompteur() {
-    const { count } = await supabase.from('messages_contact').select('*', { count: 'exact', head: true }).eq('lu', false)
+    const { count } = await supabase
+      .from('messages_contact')
+      .select('*', { count: 'exact', head: true })
+      .eq('lu', false)
     setMessagesNonLus(count || 0)
   }
 
+  const lienStyle = (isActive) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '8px 14px',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    textDecoration: 'none',
+    transition: 'background 0.15s',
+    background: isActive ? '#F0B429' : 'transparent',
+    color: isActive ? '#1E1912' : '#FFFFFF',
+  })
+
   return (
     <div>
-      <h1 className="text-2xl font-medium mb-4" style={{ color: '#3d1e06' }}>Panel Admin</h1>
-
-      <div className="flex gap-2 flex-wrap mb-6 border-b pb-4" style={{ borderColor: '#d6bfa0' }}>
-        {adminNav.map(item => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/admin'}
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ` +
-              (isActive ? '' : 'hover:opacity-80')
-            }
-            style={({ isActive }) => isActive
-              ? { background: '#5a2e0e', color: '#fdf0d0' }
-              : { background: '#f5e2c0', color: '#7a4010' }
-            }
-          >
-            <span>{item.icon}</span>
-            <span>{item.label}</span>
-            {item.path === '/admin/messages' && messagesNonLus > 0 && (
-              <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#c0392b', color: '#fff' }}>
-                {messagesNonLus}
-              </span>
-            )}
-          </NavLink>
-        ))}
+      {/* Titre + bouton menu mobile */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-medium" style={{ color: '#EDD98A' }}>Panel Admin</h1>
+        <button
+          className="sm:hidden px-3 py-1.5 rounded-lg text-sm font-medium"
+          style={{ background: '#2C2518', color: '#FFFFFF', border: '1px solid #4A3820' }}
+          onClick={() => setSidebarOuverte(v => !v)}
+        >
+          {sidebarOuverte ? '✕ Fermer' : '☰ Menu'}
+        </button>
       </div>
 
-      <Outlet />
+      <div className="flex gap-0" style={{ minHeight: '70vh' }}>
+        {/* Sidebar */}
+        <aside
+          style={{
+            width: '210px',
+            minWidth: '210px',
+            background: '#1a1610',
+            borderRight: '1px solid #4A3820',
+            borderRadius: '1rem 0 0 1rem',
+            padding: '1rem 0.75rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}
+          className={sidebarOuverte ? '' : 'hidden sm:flex'}
+        >
+          {adminNav.map((section, si) => (
+            <div key={si} style={{ marginBottom: section.groupe ? '4px' : '0' }}>
+              {section.groupe && (
+                <p style={{
+                  fontSize: '0.65rem',
+                  fontWeight: '700',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: '#7A6A50',
+                  padding: '12px 14px 4px',
+                  margin: 0,
+                }}>
+                  {section.groupe}
+                </p>
+              )}
+              {!section.groupe && si > 0 && (
+                <div style={{ height: '1px', background: '#4A3820', margin: '8px 4px' }} />
+              )}
+              {section.items.map(item => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.exact}
+                  style={({ isActive }) => lienStyle(isActive)}
+                  onClick={() => setSidebarOuverte(false)}
+                >
+                  <span style={{ fontSize: '1rem' }}>{item.icon}</span>
+                  <span style={{ flex: 1 }}>{item.label}</span>
+                  {item.badge && messagesNonLus > 0 && (
+                    <span style={{
+                      fontSize: '0.7rem',
+                      padding: '1px 7px',
+                      borderRadius: '999px',
+                      background: '#B03A2E',
+                      color: '#fff',
+                      fontWeight: '600',
+                    }}>
+                      {messagesNonLus}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          ))}
+        </aside>
+
+        {/* Contenu */}
+        <main style={{
+          flex: 1,
+          minWidth: 0,
+          padding: '1.5rem 1.75rem',
+          background: '#1E1912',
+          borderRadius: '0 1rem 1rem 0',
+          border: '1px solid #4A3820',
+          borderLeft: 'none',
+        }}>
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }

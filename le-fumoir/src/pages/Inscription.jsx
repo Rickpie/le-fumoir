@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
 
@@ -40,17 +40,15 @@ function Inscription() {
     setChargement(false)
   }
 
-  const inputStyle = {
-    borderColor: '#d6bfa0', background: '#fff', color: '#3d1e06'
-  }
-  const labelStyle = { color: '#7a4010' }
+  const inputStyle = { borderColor: '#4A3820', background: '#1E1912', color: '#EDD98A' }
+  const labelStyle = { color: '#FFFFFF' }
 
   return (
     <div className="max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-medium mb-6" style={{ color: '#3d1e06' }}>Créer un compte</h1>
+      <h1 className="text-2xl font-medium mb-6" style={{ color: '#EDD98A' }}>Créer un compte</h1>
 
       {erreur && (
-        <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: '#fde8e8', color: '#c0392b' }}>
+        <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'rgba(176,58,46,0.15)', color: '#B03A2E', border: '1px solid rgba(176,58,46,0.3)' }}>
           {erreur}
         </div>
       )}
@@ -103,16 +101,16 @@ function Inscription() {
         <button
           type="submit"
           disabled={chargement}
-          className="py-2 px-4 rounded-lg text-sm font-medium transition-all"
-          style={{ background: '#5a2e0e', color: '#fdf0d0' }}
+          className="py-2 px-4 rounded-lg text-sm font-semibold transition-opacity"
+          style={{ background: '#F0B429', color: '#1E1912', opacity: chargement ? 0.6 : 1 }}
         >
           {chargement ? 'Inscription...' : 'Créer mon compte'}
         </button>
       </form>
 
-      <p className="mt-4 text-sm" style={{ color: '#7a4010' }}>
+      <p className="mt-4 text-sm" style={{ color: '#FFFFFF' }}>
         Déjà un compte ?{' '}
-        <Link to="/connexion" style={{ color: '#5a2e0e', fontWeight: 500 }}>Se connecter</Link>
+        <Link to="/connexion" style={{ color: '#F0B429', fontWeight: 500 }}>Se connecter</Link>
       </p>
     </div>
   )

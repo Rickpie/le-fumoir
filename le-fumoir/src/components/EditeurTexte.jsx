@@ -92,7 +92,7 @@ function EditeurTexte({ contenu, onChange }) {
       </div>
 
       {/* Zone d'édition */}
-      <div className="p-3 prose prose-sm max-w-none min-h-[500px]" style={{ color: '#3d1e06' }}>
+      <div className="p-3 prose prose-sm max-w-none min-h-[500px]" style={{ color: '#3d1e06', background: '#fdf6ec' }}>
         <EditorContent editor={editor} />
       </div>
     </div>

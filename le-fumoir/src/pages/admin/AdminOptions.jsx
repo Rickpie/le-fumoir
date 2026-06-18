@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase'
 
 function AdminOptions() {
@@ -6,26 +6,28 @@ function AdminOptions() {
   const [inserts, setInserts] = useState([])
   const [chargement, setChargement] = useState(true)
 
-  // Formulaires d'ajout
   const [nouvelleEpice, setNouvelleEpice] = useState({ nom: '', prix_supplement: '' })
   const [nouvelInsert, setNouvelInsert] = useState({ nom: '', prix_supplement: '' })
+
+  const [enEdition, setEnEdition] = useState(null)
+  const [formEdition, setFormEdition] = useState({ nom: '', prix_supplement: '' })
 
   useEffect(() => {
     chargerDonnees()
   }, [])
 
-async function chargerDonnees() {
-  const { data: e } = await supabase.from('epices').select('*')
-  const { data: i } = await supabase.from('inserts').select('*')
+  async function chargerDonnees() {
+    const { data: e } = await supabase.from('epices').select('*')
+    const { data: i } = await supabase.from('inserts').select('*')
 
-  const trier = (liste) => (liste || []).sort((a, b) =>
-    a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' })
-  )
+    const trier = (liste) => (liste || []).sort((a, b) =>
+      a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' })
+    )
 
-  setEpices(trier(e))
-  setInserts(trier(i))
-  setChargement(false)
-}
+    setEpices(trier(e))
+    setInserts(trier(i))
+    setChargement(false)
+  }
 
   async function ajouterEpice(e) {
     e.preventDefault()
@@ -54,22 +56,43 @@ async function chargerDonnees() {
     chargerDonnees()
   }
 
+  function ouvrirEdition(item) {
+    setEnEdition(item.id)
+    setFormEdition({ nom: item.nom, prix_supplement: item.prix_supplement })
+  }
+
+  function annulerEdition() {
+    setEnEdition(null)
+    setFormEdition({ nom: '', prix_supplement: '' })
+  }
+
+  async function enregistrerEdition(table, id) {
+    await supabase.from(table).update({
+      nom: formEdition.nom,
+      prix_supplement: parseFloat(formEdition.prix_supplement) || 0,
+    }).eq('id', id)
+    setEnEdition(null)
+    chargerDonnees()
+  }
+
   async function supprimer(table, id) {
-    if (!confirm('Supprimer définitivement cet élément ?')) return
+    if (!confirm('Supprimer définitivement cet élément ? Il sera retiré de tous les produits associés.')) return
+    if (table === 'epices') await supabase.from('produit_epices').delete().eq('epice_id', id)
+    if (table === 'inserts') await supabase.from('produit_inserts').delete().eq('insert_id', id)
     await supabase.from(table).delete().eq('id', id)
     chargerDonnees()
   }
 
-  if (chargement) return <p style={{ color: '#7a4010' }}>Chargement...</p>
+  if (chargement) return <p style={{ color: '#FFFFFF' }}>Chargement...</p>
 
-  const inputStyle = { borderColor: '#d6bfa0', background: '#fff', color: '#3d1e06' }
+  const inputStyle = { borderColor: '#4A3820', background: '#1E1912', color: '#EDD98A' }
 
   return (
     <div className="grid md:grid-cols-2 gap-6">
 
       {/* ÉPICES */}
       <div>
-        <h2 className="text-lg font-medium mb-3" style={{ color: '#3d1e06' }}>🧂 Épices</h2>
+        <h2 className="text-lg font-medium mb-3" style={{ color: '#EDD98A' }}>🧂 Épices</h2>
 
         <form onSubmit={ajouterEpice} className="flex gap-2 mb-4">
           <input
@@ -88,41 +111,65 @@ async function chargerDonnees() {
             className="w-24 px-3 py-2 rounded-lg border text-sm outline-none"
             style={inputStyle}
           />
-          <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+          <button type="submit" className="px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{ background: '#F0B429', color: '#1E1912' }}>
             Ajouter
           </button>
         </form>
 
         <div className="flex flex-col gap-2">
           {epices.map(epice => (
-            <div key={epice.id} className="flex items-center justify-between bg-white rounded-lg p-3 border"
-              style={{ borderColor: '#d6bfa0', opacity: epice.visible ? 1 : 0.5 }}>
-              <div>
-                <span className="text-sm font-medium" style={{ color: '#3d1e06' }}>{epice.nom}</span>
-                <span className="text-xs ml-2" style={{ color: '#b06010' }}>+{epice.prix_supplement} €</span>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => toggleVisibilite('epices', epice.id, epice.visible)}
-                  className="text-xs px-2 py-1 rounded-md"
-                  style={{ background: '#f5e2c0', color: '#7a4010' }}>
-                  {epice.visible ? 'Cacher' : 'Afficher'}
-                </button>
-                <button onClick={() => supprimer('epices', epice.id)}
-                  className="text-xs px-2 py-1 rounded-md"
-                  style={{ background: '#fde8e8', color: '#c0392b' }}>
-                  Suppr.
-                </button>
-              </div>
+            <div key={epice.id} className="rounded-lg border overflow-hidden"
+              style={{ background: '#2C2518', borderColor: enEdition === epice.id ? '#F0B429' : '#4A3820', opacity: epice.visible ? 1 : 0.5 }}>
+
+              {enEdition === epice.id ? (
+                <div className="flex items-center gap-2 p-2">
+                  <input value={formEdition.nom} onChange={e => setFormEdition({ ...formEdition, nom: e.target.value })}
+                    className="flex-1 px-2 py-1 rounded-md border text-sm outline-none" style={inputStyle} />
+                  <input type="number" step="0.01" value={formEdition.prix_supplement}
+                    onChange={e => setFormEdition({ ...formEdition, prix_supplement: e.target.value })}
+                    className="w-20 px-2 py-1 rounded-md border text-sm outline-none" style={inputStyle} placeholder="+€" />
+                  <button onClick={() => enregistrerEdition('epices', epice.id)}
+                    className="text-xs px-2 py-1 rounded-md font-medium"
+                    style={{ background: '#F0B429', color: '#1E1912' }}>✓</button>
+                  <button onClick={annulerEdition}
+                    className="text-xs px-2 py-1 rounded-md"
+                    style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>✕</button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3">
+                  <div>
+                    <span className="text-sm font-medium" style={{ color: '#EDD98A' }}>{epice.nom}</span>
+                    <span className="text-xs ml-2" style={{ color: '#F0B429' }}>+{epice.prix_supplement} €</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => ouvrirEdition(epice)}
+                      className="text-xs px-2 py-1 rounded-md"
+                      style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
+                      Modifier
+                    </button>
+                    <button onClick={() => toggleVisibilite('epices', epice.id, epice.visible)}
+                      className="text-xs px-2 py-1 rounded-md"
+                      style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
+                      {epice.visible ? 'Cacher' : 'Afficher'}
+                    </button>
+                    <button onClick={() => supprimer('epices', epice.id)}
+                      className="text-xs px-2 py-1 rounded-md"
+                      style={{ background: 'rgba(176,58,46,0.15)', color: '#B03A2E', border: '1px solid rgba(176,58,46,0.3)' }}>
+                      Suppr.
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
-          {epices.length === 0 && <p className="text-sm" style={{ color: '#a07050' }}>Aucune épice pour l'instant.</p>}
+          {epices.length === 0 && <p className="text-sm" style={{ color: '#FFFFFF' }}>Aucune épice pour l'instant.</p>}
         </div>
       </div>
 
       {/* INSERTS */}
       <div>
-        <h2 className="text-lg font-medium mb-3" style={{ color: '#3d1e06' }}>🧀 Inserts</h2>
+        <h2 className="text-lg font-medium mb-3" style={{ color: '#EDD98A' }}>🧀 Inserts</h2>
 
         <form onSubmit={ajouterInsert} className="flex gap-2 mb-4">
           <input
@@ -141,35 +188,59 @@ async function chargerDonnees() {
             className="w-24 px-3 py-2 rounded-lg border text-sm outline-none"
             style={inputStyle}
           />
-          <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+          <button type="submit" className="px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{ background: '#F0B429', color: '#1E1912' }}>
             Ajouter
           </button>
         </form>
 
         <div className="flex flex-col gap-2">
           {inserts.map(insert => (
-            <div key={insert.id} className="flex items-center justify-between bg-white rounded-lg p-3 border"
-              style={{ borderColor: '#d6bfa0', opacity: insert.visible ? 1 : 0.5 }}>
-              <div>
-                <span className="text-sm font-medium" style={{ color: '#3d1e06' }}>{insert.nom}</span>
-                <span className="text-xs ml-2" style={{ color: '#b06010' }}>+{insert.prix_supplement} €</span>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => toggleVisibilite('inserts', insert.id, insert.visible)}
-                  className="text-xs px-2 py-1 rounded-md"
-                  style={{ background: '#f5e2c0', color: '#7a4010' }}>
-                  {insert.visible ? 'Cacher' : 'Afficher'}
-                </button>
-                <button onClick={() => supprimer('inserts', insert.id)}
-                  className="text-xs px-2 py-1 rounded-md"
-                  style={{ background: '#fde8e8', color: '#c0392b' }}>
-                  Suppr.
-                </button>
-              </div>
+            <div key={insert.id} className="rounded-lg border overflow-hidden"
+              style={{ background: '#2C2518', borderColor: enEdition === insert.id ? '#F0B429' : '#4A3820', opacity: insert.visible ? 1 : 0.5 }}>
+
+              {enEdition === insert.id ? (
+                <div className="flex items-center gap-2 p-2">
+                  <input value={formEdition.nom} onChange={e => setFormEdition({ ...formEdition, nom: e.target.value })}
+                    className="flex-1 px-2 py-1 rounded-md border text-sm outline-none" style={inputStyle} />
+                  <input type="number" step="0.01" value={formEdition.prix_supplement}
+                    onChange={e => setFormEdition({ ...formEdition, prix_supplement: e.target.value })}
+                    className="w-20 px-2 py-1 rounded-md border text-sm outline-none" style={inputStyle} placeholder="+€" />
+                  <button onClick={() => enregistrerEdition('inserts', insert.id)}
+                    className="text-xs px-2 py-1 rounded-md font-medium"
+                    style={{ background: '#F0B429', color: '#1E1912' }}>✓</button>
+                  <button onClick={annulerEdition}
+                    className="text-xs px-2 py-1 rounded-md"
+                    style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>✕</button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3">
+                  <div>
+                    <span className="text-sm font-medium" style={{ color: '#EDD98A' }}>{insert.nom}</span>
+                    <span className="text-xs ml-2" style={{ color: '#F0B429' }}>+{insert.prix_supplement} €</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => ouvrirEdition(insert)}
+                      className="text-xs px-2 py-1 rounded-md"
+                      style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
+                      Modifier
+                    </button>
+                    <button onClick={() => toggleVisibilite('inserts', insert.id, insert.visible)}
+                      className="text-xs px-2 py-1 rounded-md"
+                      style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
+                      {insert.visible ? 'Cacher' : 'Afficher'}
+                    </button>
+                    <button onClick={() => supprimer('inserts', insert.id)}
+                      className="text-xs px-2 py-1 rounded-md"
+                      style={{ background: 'rgba(176,58,46,0.15)', color: '#B03A2E', border: '1px solid rgba(176,58,46,0.3)' }}>
+                      Suppr.
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
-          {inserts.length === 0 && <p className="text-sm" style={{ color: '#a07050' }}>Aucun insert pour l'instant.</p>}
+          {inserts.length === 0 && <p className="text-sm" style={{ color: '#FFFFFF' }}>Aucun insert pour l'instant.</p>}
         </div>
       </div>
 

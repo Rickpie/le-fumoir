@@ -3,7 +3,7 @@ import Sidebar from './Sidebar'
 
 function Layout() {
   return (
-    <div className="flex min-h-screen" style={{ background: '#fdf6ec' }}>
+    <div className="flex min-h-screen" style={{ background: '#1E1912' }}>
       <Sidebar />
       <main className="flex-1 p-6">
         <Outlet />

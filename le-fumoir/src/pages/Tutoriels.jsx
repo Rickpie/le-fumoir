@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
+import { useAuth } from '../context/AuthContext'
 
 function Tutoriels() {
   const [tutoriels, setTutoriels] = useState([])
@@ -8,6 +10,9 @@ function Tutoriels() {
   const [packSelectionne, setPackSelectionne] = useState(null)
   const [contenuPack, setContenuPack] = useState(null)
   const [chargement, setChargement] = useState(true)
+  const navigate = useNavigate()
+  const { profil } = useAuth()
+  const estAdmin = profil?.role === 'admin'
 
   useEffect(() => {
     chargerDonnees()
@@ -34,6 +39,18 @@ function Tutoriels() {
   async function ouvrirTuto(tuto) {
     setTutoSelectionne(tuto)
     await supabase.rpc('incrementer_clics_tutoriel', { tutoriel_id: tuto.id }).catch(() => {})
+  }
+
+  function modifierTuto(e, tuto) {
+    e.stopPropagation()
+    navigate(`/admin/tutoriels?edit=${tuto.id}`)
+  }
+
+  async function supprimerTuto(e, tutoId) {
+    e.stopPropagation()
+    if (!confirm('Supprimer définitivement ce tutoriel ?')) return
+    await supabase.from('tutoriels').delete().eq('id', tutoId)
+    chargerDonnees()
   }
 
   async function ouvrirPack(pack) {
@@ -69,48 +86,48 @@ function Tutoriels() {
 
   if (chargement) return (
     <div className="flex items-center justify-center h-40">
-      <p style={{ color: '#7a4010' }}>Chargement...</p>
+      <p style={{ color: '#FFFFFF' }}>Chargement...</p>
     </div>
   )
 
   // VUE DÉTAIL PACK
   if (packSelectionne) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div>
         <button onClick={() => { setPackSelectionne(null); setContenuPack(null) }}
-          className="text-sm mb-6 flex items-center gap-1"
-          style={{ color: '#7a4010' }}>
+          className="text-sm mb-6 flex items-center gap-1 transition-colors"
+          style={{ color: '#FFFFFF' }}>
           ← Retour aux tutoriels
         </button>
 
-        <div className="bg-white rounded-2xl border shadow-sm p-6 sm:p-8" style={{ borderColor: '#d6bfa0' }}>
+        <div className="rounded-2xl border p-6 sm:p-8" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
           {packSelectionne.photo_url && (
             <img src={packSelectionne.photo_url} alt={packSelectionne.titre}
               className="w-full h-56 object-cover rounded-xl mb-6" />
           )}
 
           <span className="inline-block text-xs mb-3 px-2 py-0.5 rounded-full font-medium"
-            style={{ background: '#fce0a0', color: '#6b3c06' }}>
+            style={{ background: 'rgba(240,180,41,0.15)', color: '#F0B429', border: '1px solid rgba(240,180,41,0.3)' }}>
             Pack
           </span>
 
-          <h1 className="text-3xl font-medium mb-2" style={{ color: '#3d1e06' }}>{packSelectionne.titre}</h1>
+          <h1 className="text-3xl font-medium mb-2" style={{ color: '#EDD98A' }}>{packSelectionne.titre}</h1>
           {packSelectionne.description && (
-            <p className="text-base mb-6" style={{ color: '#7a4010' }}>{packSelectionne.description}</p>
+            <p className="text-base mb-6" style={{ color: '#FFFFFF' }}>{packSelectionne.description}</p>
           )}
 
-          <div className="border-t mb-6" style={{ borderColor: '#d6bfa0' }} />
+          <div className="border-t mb-6" style={{ borderColor: '#4A3820' }} />
 
-          <h2 className="text-lg font-medium mb-3" style={{ color: '#3d1e06' }}>Ce pack contient :</h2>
+          <h2 className="text-lg font-medium mb-3" style={{ color: '#EDD98A' }}>Ce pack contient :</h2>
 
           {contenuPack?.tutoriels.length > 0 && (
             <div className="mb-4">
-              <p className="text-sm font-medium mb-1" style={{ color: '#7a4010' }}>📖 Tutoriels</p>
-              <ul className="text-sm" style={{ color: '#3d1e06' }}>
+              <p className="text-sm font-medium mb-1" style={{ color: '#F0B429' }}>📖 Tutoriels</p>
+              <ul className="text-sm" style={{ color: '#EDD98A' }}>
                 {contenuPack.tutoriels.map(t => (
-                  <li key={t.titre} className="flex justify-between">
+                  <li key={t.titre} className="flex justify-between py-0.5">
                     <span>• {t.titre}</span>
-                    <span style={{ color: '#a07050' }}>{t.prix} €</span>
+                    <span style={{ color: '#FFFFFF' }}>{t.prix} €</span>
                   </li>
                 ))}
               </ul>
@@ -119,12 +136,12 @@ function Tutoriels() {
 
           {contenuPack?.produits.length > 0 && (
             <div className="mb-4">
-              <p className="text-sm font-medium mb-1" style={{ color: '#7a4010' }}>🥩 Produits</p>
-              <ul className="text-sm" style={{ color: '#3d1e06' }}>
+              <p className="text-sm font-medium mb-1" style={{ color: '#F0B429' }}>🥩 Produits</p>
+              <ul className="text-sm" style={{ color: '#EDD98A' }}>
                 {contenuPack.produits.map(p => (
-                  <li key={p.nom} className="flex justify-between">
+                  <li key={p.nom} className="flex justify-between py-0.5">
                     <span>• {p.nom}</span>
-                    <span style={{ color: '#a07050' }}>{p.prix} €</span>
+                    <span style={{ color: '#FFFFFF' }}>{p.prix} €</span>
                   </li>
                 ))}
               </ul>
@@ -133,12 +150,12 @@ function Tutoriels() {
 
           {contenuPack?.fichiers.length > 0 && (
             <div className="mb-6">
-              <p className="text-sm font-medium mb-1" style={{ color: '#7a4010' }}>📄 Fichiers inclus</p>
-              <ul className="text-sm" style={{ color: '#3d1e06' }}>
+              <p className="text-sm font-medium mb-1" style={{ color: '#F0B429' }}>📄 Fichiers inclus</p>
+              <ul className="text-sm" style={{ color: '#EDD98A' }}>
                 {contenuPack.fichiers.map(f => (
-                  <li key={f.nom} className="flex justify-between">
+                  <li key={f.nom} className="flex justify-between py-0.5">
                     <span>• {f.nom}</span>
-                    <span style={{ color: '#a07050' }}>{f.prix > 0 ? `${f.prix} €` : 'inclus'}</span>
+                    <span style={{ color: '#FFFFFF' }}>{f.prix > 0 ? `${f.prix} €` : 'inclus'}</span>
                   </li>
                 ))}
               </ul>
@@ -146,16 +163,16 @@ function Tutoriels() {
           )}
 
           {contenuPack?.totalSepare > packSelectionne.prix && (
-            <div className="flex items-center justify-between mb-4 text-sm" style={{ color: '#7a4010' }}>
+            <div className="flex items-center justify-between mb-4 text-sm" style={{ color: '#FFFFFF' }}>
               <span>Prix si acheté séparément</span>
               <span className="line-through">{contenuPack.totalSepare.toFixed(2)} €</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: '#f5e2c0' }}>
-            <span className="text-lg font-medium" style={{ color: '#3d1e06' }}>{packSelectionne.prix} €</span>
-            <button className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+          <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: '#1E1912', border: '1px solid #4A3820' }}>
+            <span className="text-lg font-semibold" style={{ color: '#F0B429' }}>{packSelectionne.prix} €</span>
+            <button className="px-4 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: '#F0B429', color: '#1E1912' }}>
               Acheter ce pack
             </button>
           </div>
@@ -167,51 +184,53 @@ function Tutoriels() {
   // VUE DÉTAIL TUTORIEL
   if (tutoSelectionne) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div>
         <button onClick={() => setTutoSelectionne(null)}
           className="text-sm mb-6 flex items-center gap-1"
-          style={{ color: '#7a4010' }}>
+          style={{ color: '#FFFFFF' }}>
           ← Retour aux tutoriels
         </button>
 
-        <div className="bg-white rounded-2xl border shadow-sm p-6 sm:p-8" style={{ borderColor: '#d6bfa0' }}>
+        <div className="rounded-2xl border p-6 sm:p-8" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
           {tutoSelectionne.photo_url && (
             <img src={tutoSelectionne.photo_url} alt={tutoSelectionne.titre}
               className="w-full h-56 object-cover rounded-xl mb-6" />
           )}
 
           <span className="inline-block text-xs mb-3 px-2 py-0.5 rounded-full font-medium"
-            style={tutoSelectionne.gratuit ? { background: '#eaf3de', color: '#3B6D11' } : { background: '#fce0a0', color: '#6b3c06' }}>
+            style={tutoSelectionne.gratuit
+              ? { background: 'rgba(107,142,78,0.2)', color: '#6B8E4E', border: '1px solid rgba(107,142,78,0.3)' }
+              : { background: 'rgba(240,180,41,0.15)', color: '#F0B429', border: '1px solid rgba(240,180,41,0.3)' }}>
             {tutoSelectionne.gratuit ? 'Gratuit' : `Payant — ${tutoSelectionne.prix} €`}
           </span>
 
-          <h1 className="text-3xl font-medium mb-2" style={{ color: '#3d1e06' }}>{tutoSelectionne.titre}</h1>
+          <h1 className="text-3xl font-medium mb-2" style={{ color: '#EDD98A' }}>{tutoSelectionne.titre}</h1>
           {tutoSelectionne.sous_titre && (
-            <p className="text-base mb-3" style={{ color: '#a07050' }}>{tutoSelectionne.sous_titre}</p>
+            <p className="text-base mb-3" style={{ color: '#FFFFFF' }}>{tutoSelectionne.sous_titre}</p>
           )}
 
           {tutoSelectionne.created_at && (
-            <p className="text-xs mb-6" style={{ color: '#a07050' }}>
+            <p className="text-xs mb-6" style={{ color: '#FFFFFF' }}>
               Publié le {new Date(tutoSelectionne.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           )}
 
-          <div className="border-t mb-6" style={{ borderColor: '#d6bfa0' }} />
+          <div className="border-t mb-6" style={{ borderColor: '#4A3820' }} />
 
           {tutoSelectionne.gratuit ? (
             <div
               className="prose prose-base max-w-none article-tutoriel"
-              style={{ color: '#3d1e06' }}
+              style={{ color: '#EDD98A' }}
               dangerouslySetInnerHTML={{ __html: tutoSelectionne.contenu }}
             />
           ) : (
-            <div className="text-center py-10 rounded-xl" style={{ background: '#fdf6ec' }}>
+            <div className="text-center py-10 rounded-xl" style={{ background: '#1E1912', border: '1px solid #4A3820' }}>
               <p className="text-3xl mb-3">🔒</p>
-              <p className="text-sm mb-4" style={{ color: '#7a4010' }}>
+              <p className="text-sm mb-4" style={{ color: '#FFFFFF' }}>
                 Ce tutoriel est payant. Achète-le pour débloquer le contenu complet.
               </p>
-              <button className="px-4 py-2 rounded-lg text-sm font-medium"
-                style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+              <button className="px-4 py-2 rounded-lg text-sm font-semibold"
+                style={{ background: '#F0B429', color: '#1E1912' }}>
                 Acheter pour {tutoSelectionne.prix} €
               </button>
             </div>
@@ -224,25 +243,43 @@ function Tutoriels() {
   // VUE LISTE
   return (
     <div>
-      <h1 className="text-2xl font-medium mb-6" style={{ color: '#3d1e06' }}>Tutoriels</h1>
+      <h1 className="text-2xl font-medium mb-6" style={{ color: '#EDD98A' }}>Tutoriels</h1>
 
       {packs.length > 0 && (
         <>
-          <h2 className="text-sm font-medium mb-3 uppercase tracking-wide" style={{ color: '#8a5a28' }}>Packs disponibles</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <h2 className="text-xs font-semibold mb-3 uppercase tracking-widest" style={{ color: '#FFFFFF' }}>Packs disponibles</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
             {packs.map(pack => (
               <div key={pack.id} onClick={() => ouvrirPack(pack)}
-                className="bg-white rounded-xl border cursor-pointer"
-                style={{ borderColor: '#d6bfa0', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(80,35,5,0.14)' }}
+                className="rounded-xl cursor-pointer flex flex-col overflow-hidden"
+                style={{
+                  background: '#2C2518',
+                  border: '1px solid #4A3820',
+                  borderTop: '2px solid rgba(240,180,41,0.5)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px #F0B429' }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
               >
-                <div className="h-36 rounded-t-xl flex items-center justify-center text-3xl overflow-hidden" style={{ background: '#fce0a0' }}>
-                  {pack.photo_url ? <img src={pack.photo_url} alt={pack.titre} className="h-full w-full object-cover" /> : '📦'}
+                <div className="relative overflow-hidden" style={{ height: '200px' }}>
+                  {pack.photo_url
+                    ? <img src={pack.photo_url} alt={pack.titre} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-5xl" style={{ background: '#3A2E1A' }}>📦</div>
+                  }
+                  <div className="absolute inset-0" style={{
+                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 30%, rgba(28,22,14,0.75) 100%)'
+                  }} />
+                  <span className="absolute bottom-2 left-3 text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: 'rgba(240,180,41,0.9)', color: '#1E1912' }}>
+                    Pack — {pack.prix} €
+                  </span>
                 </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-sm" style={{ color: '#2e1506' }}>{pack.titre}</h3>
-                  <p className="text-sm font-medium mt-2" style={{ color: '#b06010' }}>{pack.prix} €</p>
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="font-semibold text-sm leading-snug" style={{ color: '#EDD98A' }}>{pack.titre}</h3>
+                  {pack.description && <p className="text-xs mt-1 line-clamp-2" style={{ color: '#FFFFFF' }}>{pack.description}</p>}
+                  <div className="mt-3 pt-3 flex items-center justify-end" style={{ borderTop: '1px solid #4A3820' }}>
+                    <span className="text-xs font-medium" style={{ color: '#F0B429' }}>Voir le pack →</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -250,36 +287,73 @@ function Tutoriels() {
         </>
       )}
 
-      <h2 className="text-sm font-medium mb-3 uppercase tracking-wide" style={{ color: '#8a5a28' }}>Tutoriels</h2>
+      <h2 className="text-xs font-semibold mb-3 uppercase tracking-widest" style={{ color: '#FFFFFF' }}>Tutoriels</h2>
 
       {tutoriels.length === 0 ? (
-        <div className="text-center py-16" style={{ color: '#7a4010' }}>
+        <div className="text-center py-16" style={{ color: '#FFFFFF' }}>
           <p className="text-4xl mb-3">📖</p>
           <p className="text-sm">Aucun tutoriel disponible pour le moment.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {tutoriels.map(tuto => (
             <div
               key={tuto.id}
               onClick={() => ouvrirTuto(tuto)}
-              className="bg-white rounded-xl border cursor-pointer"
-              style={{ borderColor: '#d6bfa0', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(80,35,5,0.14)' }}
+              className="rounded-xl cursor-pointer flex flex-col overflow-hidden relative"
+              style={{
+                background: '#2C2518',
+                border: '1px solid #4A3820',
+                borderTop: '2px solid rgba(240,180,41,0.5)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px #F0B429' }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
             >
-              <div className="h-36 rounded-t-xl flex items-center justify-center text-3xl overflow-hidden" style={{ background: '#f5e2c0' }}>
-                {tuto.photo_url ? <img src={tuto.photo_url} alt={tuto.titre} className="h-full w-full object-cover" /> : '📖'}
-              </div>
-              <div className="p-3">
-                <h3 className="font-medium text-sm" style={{ color: '#2e1506' }}>{tuto.titre}</h3>
-                {tuto.sous_titre && (
-                  <p className="text-xs mt-1 line-clamp-2" style={{ color: '#7a4820' }}>{tuto.sous_titre}</p>
-                )}
-                <span className="inline-block text-xs mt-2 px-2 py-0.5 rounded-full"
-                  style={tuto.gratuit ? { background: '#eaf3de', color: '#3B6D11' } : { background: '#fce0a0', color: '#6b3c06' }}>
-                  {tuto.gratuit ? 'Gratuit' : `Payant — ${tuto.prix} €`}
+              {/* Boutons admin */}
+              {estAdmin && (
+                <div className="absolute top-2 right-2 z-10 flex gap-1" onClick={e => e.stopPropagation()}>
+                  <button onClick={e => modifierTuto(e, tuto)}
+                    className="text-xs px-2 py-1 rounded-md font-medium"
+                    style={{ background: 'rgba(240,180,41,0.9)', color: '#1E1912' }}>
+                    ✏️
+                  </button>
+                  <button onClick={e => supprimerTuto(e, tuto.id)}
+                    className="text-xs px-2 py-1 rounded-md font-medium"
+                    style={{ background: 'rgba(176,58,46,0.9)', color: '#fff' }}>
+                    🗑️
+                  </button>
+                </div>
+              )}
+
+              {/* Photo avec overlay gradient + badge */}
+              <div className="relative overflow-hidden" style={{ height: '200px' }}>
+                {tuto.photo_url
+                  ? <img src={tuto.photo_url} alt={tuto.titre} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-5xl" style={{ background: '#3A2E1A' }}>📖</div>
+                }
+                <div className="absolute inset-0" style={{
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 30%, rgba(28,22,14,0.75) 100%)'
+                }} />
+                {/* Badge gratuit/payant sur la photo */}
+                <span className="absolute bottom-2 left-3 text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={tuto.gratuit
+                    ? { background: 'rgba(107,142,78,0.85)', color: '#fff', backdropFilter: 'blur(4px)' }
+                    : { background: 'rgba(240,180,41,0.9)', color: '#1E1912', backdropFilter: 'blur(4px)' }}>
+                  {tuto.gratuit ? 'Gratuit' : `${tuto.prix} €`}
                 </span>
+              </div>
+
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="font-semibold text-sm mb-1 leading-snug" style={{ color: '#EDD98A' }}>{tuto.titre}</h3>
+                {tuto.sous_titre && (
+                  <p className="text-xs line-clamp-2 flex-1" style={{ color: '#FFFFFF' }}>{tuto.sous_titre}</p>
+                )}
+                <div className="mt-3 pt-3 flex items-center justify-end" style={{ borderTop: '1px solid #4A3820' }}>
+                  <span className="text-xs font-medium" style={{ color: '#F0B429' }}>
+                    {tuto.gratuit ? 'Lire →' : 'Voir le tutoriel →'}
+                  </span>
+                </div>
               </div>
             </div>
           ))}

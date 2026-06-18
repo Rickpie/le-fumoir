@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 function Boutique() {
   const [produits, setProduits] = useState([])
@@ -8,6 +9,8 @@ function Boutique() {
   const [categorieActive, setCategorieActive] = useState(null)
   const [chargement, setChargement] = useState(true)
   const navigate = useNavigate()
+  const { profil } = useAuth()
+  const estAdmin = profil?.role === 'admin'
 
   useEffect(() => {
     chargerDonnees()
@@ -24,7 +27,6 @@ function Boutique() {
       .select('*')
       .eq('visible', true)
 
-    // On ne garde que les catégories qui ont au moins un produit visible
     const categoriesAvecProduits = (cats || []).filter(cat =>
       (prods || []).some(p => p.categorie_id === cat.id)
     )
@@ -38,13 +40,25 @@ function Boutique() {
     await supabase.rpc('incrementer_clics_produit', { produit_id: produitId })
   }
 
+  async function supprimerProduit(e, produitId) {
+    e.stopPropagation()
+    if (!confirm('Supprimer définitivement ce produit de la boutique ?')) return
+    await supabase.from('produits').delete().eq('id', produitId)
+    chargerDonnees()
+  }
+
+  function modifierProduit(e, produitId) {
+    e.stopPropagation()
+    navigate(`/admin/produits?edit=${produitId}`)
+  }
+
   const produitsFiltres = categorieActive
     ? produits.filter(p => p.categorie_id === categorieActive)
     : produits
 
   if (chargement) return (
     <div className="flex items-center justify-center h-40">
-      <p style={{ color: '#7a4010' }}>Chargement...</p>
+      <p style={{ color: '#FFFFFF' }}>Chargement...</p>
     </div>
   )
 
@@ -52,9 +66,9 @@ function Boutique() {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-medium" style={{ color: '#3d1e06' }}>Boutique</h1>
-        <div className="mt-3 p-4 rounded-xl text-sm" style={{ background: '#f5e2c0', color: '#7a4010', border: '0.5px solid #d6bfa0' }}>
-          🔥 Tous nos produits sont préparés à la commande. Vous pouvez recevoir votre pièce <strong>prête à déguster</strong> (délai selon le produit) ou opter pour la version <strong>à faire sécher vous-même</strong> à la maison, avec nos conseils inclus.
+        <h1 className="text-2xl font-medium" style={{ color: '#EDD98A' }}>Boutique</h1>
+        <div className="mt-3 p-4 rounded-xl text-sm" style={{ background: '#2C2518', color: '#EDD98A', border: '1px solid #4A3820' }}>
+          🔥 Tous nos produits sont préparés à la commande. Vous pouvez recevoir votre pièce <strong style={{ color: '#F0B429' }}>prête à déguster</strong> (délai selon le produit) ou opter pour la version <strong style={{ color: '#F0B429' }}>à faire sécher vous-même</strong> à la maison, avec nos conseils inclus.
         </div>
       </div>
 
@@ -65,8 +79,8 @@ function Boutique() {
             onClick={() => setCategorieActive(null)}
             className="px-3 py-1.5 rounded-full text-sm font-medium transition-all"
             style={categorieActive === null
-              ? { background: '#5a2e0e', color: '#fdf0d0' }
-              : { background: '#f5e2c0', color: '#7a4010' }
+              ? { background: '#F0B429', color: '#1E1912' }
+              : { background: '#2C2518', color: '#FFFFFF', border: '1px solid #4A3820' }
             }
           >
             Tout
@@ -77,8 +91,8 @@ function Boutique() {
               onClick={() => setCategorieActive(cat.id)}
               className="px-3 py-1.5 rounded-full text-sm font-medium transition-all"
               style={categorieActive === cat.id
-                ? { background: '#5a2e0e', color: '#fdf0d0' }
-                : { background: '#f5e2c0', color: '#7a4010' }
+                ? { background: '#F0B429', color: '#1E1912' }
+                : { background: '#2C2518', color: '#FFFFFF', border: '1px solid #4A3820' }
               }
             >
               {cat.nom}
@@ -89,58 +103,78 @@ function Boutique() {
 
       {/* Grille de produits */}
       {produitsFiltres.length === 0 ? (
-        <div className="text-center py-16" style={{ color: '#7a4010' }}>
+        <div className="text-center py-16" style={{ color: '#FFFFFF' }}>
           <p className="text-4xl mb-3">🔥</p>
           <p className="text-sm">Aucun produit disponible pour le moment.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {produitsFiltres.map(produit => (
             <div
               key={produit.id}
               onClick={() => { incrementerClics(produit.id); navigate(`/produit/${produit.id}`) }}
-              className="bg-white rounded-xl border cursor-pointer group"
+              className="rounded-xl cursor-pointer flex flex-col overflow-hidden relative"
               style={{
-                borderColor: '#d6bfa0',
+                background: '#2C2518',
+                border: '1px solid #4A3820',
+                borderTop: '2px solid rgba(240,180,41,0.5)',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-4px)'
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(80,35,5,0.14)'
+                e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px #F0B429'
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              {/* Photo */}
-              <div
-                className="h-40 rounded-t-xl flex items-center justify-center text-4xl"
-                style={{ background: '#c8784a' }}
-              >
+              {/* Boutons admin */}
+              {estAdmin && (
+                <div className="absolute top-2 right-2 z-10 flex gap-1" onClick={e => e.stopPropagation()}>
+                  <button onClick={e => modifierProduit(e, produit.id)}
+                    className="text-xs px-2 py-1 rounded-md font-medium"
+                    style={{ background: 'rgba(240,180,41,0.9)', color: '#1E1912' }}>
+                    ✏️
+                  </button>
+                  <button onClick={e => supprimerProduit(e, produit.id)}
+                    className="text-xs px-2 py-1 rounded-md font-medium"
+                    style={{ background: 'rgba(176,58,46,0.9)', color: '#fff' }}>
+                    🗑️
+                  </button>
+                </div>
+              )}
+
+              {/* Photo avec overlay gradient */}
+              <div className="relative overflow-hidden" style={{ height: '210px' }}>
                 {produit.photo_url ? (
                   <img src={produit.photo_url} alt={produit.nom}
-                    className="h-full w-full object-cover rounded-t-xl" />
-                ) : '🥩'}
+                    className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-5xl"
+                    style={{ background: '#3A2E1A' }}>🥩</div>
+                )}
+                <div className="absolute inset-0" style={{
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 30%, rgba(28,22,14,0.75) 100%)'
+                }} />
               </div>
 
               {/* Infos */}
-              <div className="p-3">
-                <h3 className="font-medium text-sm" style={{ color: '#2e1506' }}>{produit.nom}</h3>
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="font-semibold text-sm mb-1 leading-snug" style={{ color: '#EDD98A' }}>{produit.nom}</h3>
                 {produit.description && (
-                  <p className="text-xs mt-1 line-clamp-2" style={{ color: '#7a4820' }}>
+                  <p className="text-xs line-clamp-2 flex-1" style={{ color: '#FFFFFF' }}>
                     {produit.description}
                   </p>
                 )}
-                <div className="flex items-center justify-between mt-3">
-                  <span className="text-sm font-medium" style={{ color: '#b06010' }}>
-                    dès {produit.prix} €
-                  </span>
-                  <button
-                    className="text-xs px-3 py-1.5 rounded-lg font-medium transition-all"
-                    style={{ background: '#5a2e0e', color: '#fdf0d0' }}
-                  >
-                    Choisir
+                <div className="flex items-end justify-between mt-4 pt-3" style={{ borderTop: '1px solid #4A3820' }}>
+                  <div>
+                    <p className="text-xs mb-0.5" style={{ color: '#FFFFFF' }}>à partir de</p>
+                    <p className="text-lg font-semibold leading-none" style={{ color: '#F0B429' }}>{produit.prix} €</p>
+                  </div>
+                  <button className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                    style={{ background: '#F0B429', color: '#1E1912' }}>
+                    Commander →
                   </button>
                 </div>
               </div>

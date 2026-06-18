@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../supabase'
 import UploadPhoto from '../../components/UploadPhoto'
 
@@ -14,38 +14,37 @@ function SelectMultiple({ label, options, selectionnes, onToggle, afficherPrix =
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const labelStyle = { color: '#7a4010' }
-  const inputStyle = { borderColor: '#d6bfa0', background: '#fff', color: '#3d1e06' }
+  const inputStyle = { borderColor: '#4A3820', background: '#1E1912', color: '#EDD98A' }
 
   return (
     <div ref={ref} className="relative">
-      <label className="block text-xs mb-1 font-medium" style={labelStyle}>{label}</label>
+      <label className="block text-xs mb-1 font-medium" style={{ color: '#FFFFFF' }}>{label}</label>
       <button type="button" onClick={() => setOuvert(!ouvert)}
         className="w-full px-3 py-2 rounded-lg border text-sm outline-none text-left flex items-center justify-between gap-2"
         style={inputStyle}>
         <span className="flex flex-wrap gap-1 flex-1">
           {selectionnes.length === 0
-            ? <span style={{ color: '#a07050' }}>Aucun sélectionné</span>
+            ? <span style={{ color: '#FFFFFF' }}>Aucun sélectionné</span>
             : options.filter(o => selectionnes.includes(o.id)).map(o => (
-                <span key={o.id} className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+                <span key={o.id} className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#F0B429', color: '#1E1912' }}>
                   {o.nom || o.titre}
                 </span>
               ))
           }
         </span>
-        <span>{ouvert ? '▲' : '▼'}</span>
+        <span style={{ color: '#FFFFFF' }}>{ouvert ? '▲' : '▼'}</span>
       </button>
 
       {ouvert && (
-        <div className="absolute z-10 mt-1 w-full max-h-56 overflow-y-auto rounded-lg border bg-white shadow-lg"
-          style={{ borderColor: '#d6bfa0' }}>
+        <div className="absolute z-10 mt-1 w-full max-h-56 overflow-y-auto rounded-lg border shadow-lg"
+          style={{ background: '#2C2518', borderColor: '#4A3820' }}>
           {options.length === 0 ? (
-            <p className="text-xs p-3" style={{ color: '#a07050' }}>Aucune option disponible.</p>
+            <p className="text-xs p-3" style={{ color: '#FFFFFF' }}>Aucune option disponible.</p>
           ) : options.map(opt => (
-            <label key={opt.id} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-amber-50"
-              style={{ color: '#3d1e06' }}>
+            <label key={opt.id} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-white/5"
+              style={{ color: '#EDD98A' }}>
               <input type="checkbox" checked={selectionnes.includes(opt.id)} onChange={() => onToggle(opt.id)} />
-              {opt.nom || opt.titre} {afficherPrix && opt.prix !== undefined && <span style={{ color: '#b06010' }}>({opt.prix}€)</span>}
+              {opt.nom || opt.titre} {afficherPrix && opt.prix !== undefined && <span style={{ color: '#F0B429' }}>({opt.prix}€)</span>}
             </label>
           ))}
         </div>
@@ -160,25 +159,25 @@ function AdminPacks() {
     chargerDonnees()
   }
 
-  if (chargement) return <p style={{ color: '#7a4010' }}>Chargement...</p>
+  if (chargement) return <p style={{ color: '#FFFFFF' }}>Chargement...</p>
 
-  const inputStyle = { borderColor: '#d6bfa0', background: '#fff', color: '#3d1e06' }
-  const labelStyle = { color: '#7a4010' }
+  const inputStyle = { borderColor: '#4A3820', background: '#1E1912', color: '#EDD98A' }
+  const labelStyle = { color: '#FFFFFF' }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium" style={{ color: '#3d1e06' }}>📦 Packs</h2>
-        <button onClick={ouvrirNouveau} className="px-4 py-2 rounded-lg text-sm font-medium"
-          style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+        <h2 className="text-lg font-medium" style={{ color: '#EDD98A' }}>📦 Packs</h2>
+        <button onClick={ouvrirNouveau} className="px-4 py-2 rounded-lg text-sm font-semibold"
+          style={{ background: '#F0B429', color: '#1E1912' }}>
           + Nouveau pack
         </button>
       </div>
 
       {formulaireOuvert && (
-        <form onSubmit={enregistrer} className="bg-white rounded-xl border p-4 mb-6 max-w-2xl flex flex-col gap-3"
-          style={{ borderColor: '#d6bfa0' }}>
-          <h3 className="font-medium" style={{ color: '#3d1e06' }}>
+        <form onSubmit={enregistrer} className="rounded-xl border p-4 mb-6 max-w-2xl flex flex-col gap-3"
+          style={{ background: '#2C2518', borderColor: '#4A3820' }}>
+          <h3 className="font-medium" style={{ color: '#EDD98A' }}>
             {packEnEdition ? 'Modifier le pack' : 'Nouveau pack'}
           </h3>
 
@@ -230,13 +229,13 @@ function AdminPacks() {
           />
 
           <div className="flex gap-2 mt-2">
-            <button type="submit" className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+            <button type="submit" className="px-4 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: '#F0B429', color: '#1E1912' }}>
               {packEnEdition ? 'Enregistrer' : 'Créer le pack'}
             </button>
             <button type="button" onClick={() => setFormulaireOuvert(false)}
-              className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: '#f5e2c0', color: '#7a4010' }}>
+              className="px-4 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
               Annuler
             </button>
           </div>
@@ -245,32 +244,32 @@ function AdminPacks() {
 
       <div className="flex flex-col gap-2 max-w-2xl">
         {packs.map(p => (
-          <div key={p.id} className="flex items-center justify-between bg-white rounded-lg p-3 border"
-            style={{ borderColor: '#d6bfa0', opacity: p.visible ? 1 : 0.5 }}>
+          <div key={p.id} className="flex items-center justify-between rounded-lg p-3 border"
+            style={{ background: '#2C2518', borderColor: '#4A3820', opacity: p.visible ? 1 : 0.5 }}>
             <div className="flex items-center gap-3">
               {p.photo_url && <img src={p.photo_url} alt="" className="w-10 h-10 object-cover rounded-md" />}
               <div>
-                <span className="text-sm font-medium" style={{ color: '#3d1e06' }}>{p.titre}</span>
-                <span className="text-xs ml-2" style={{ color: '#b06010' }}>{p.prix} €</span>
+                <span className="text-sm font-medium" style={{ color: '#EDD98A' }}>{p.titre}</span>
+                <span className="text-xs ml-2" style={{ color: '#F0B429' }}>{p.prix} €</span>
               </div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => ouvrirEdition(p)} className="text-xs px-2 py-1 rounded-md"
-                style={{ background: '#f5e2c0', color: '#7a4010' }}>
+                style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
                 Modifier
               </button>
               <button onClick={() => toggleVisibilite(p)} className="text-xs px-2 py-1 rounded-md"
-                style={{ background: '#f5e2c0', color: '#7a4010' }}>
+                style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
                 {p.visible ? 'Cacher' : 'Afficher'}
               </button>
               <button onClick={() => supprimer(p.id)} className="text-xs px-2 py-1 rounded-md"
-                style={{ background: '#fde8e8', color: '#c0392b' }}>
+                style={{ background: 'rgba(176,58,46,0.15)', color: '#B03A2E', border: '1px solid rgba(176,58,46,0.3)' }}>
                 Suppr.
               </button>
             </div>
           </div>
         ))}
-        {packs.length === 0 && <p className="text-sm" style={{ color: '#a07050' }}>Aucun pack pour l'instant.</p>}
+        {packs.length === 0 && <p className="text-sm" style={{ color: '#FFFFFF' }}>Aucun pack pour l'instant.</p>}
       </div>
     </div>
   )

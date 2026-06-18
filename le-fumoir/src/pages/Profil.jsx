@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../supabase'
 
@@ -32,18 +32,18 @@ function Profil() {
     setTimeout(() => setSucces(false), 3000)
   }
 
-  const labelStyle = { color: '#7a4010' }
-  const inputStyle = { borderColor: '#d6bfa0', background: '#fff', color: '#3d1e06' }
+  const labelStyle = { color: '#FFFFFF' }
+  const inputStyle = { borderColor: '#4A3820', background: '#1E1912', color: '#EDD98A' }
 
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-medium mb-6" style={{ color: '#3d1e06' }}>Mon profil</h1>
+      <h1 className="text-2xl font-medium mb-6" style={{ color: '#EDD98A' }}>Mon profil</h1>
 
-      <form onSubmit={enregistrer} className="bg-white rounded-xl border p-4 flex flex-col gap-3" style={{ borderColor: '#d6bfa0' }}>
+      <form onSubmit={enregistrer} className="rounded-xl border p-4 flex flex-col gap-3" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
         <div>
           <label className="block text-xs mb-1 font-medium" style={labelStyle}>Email</label>
           <input value={utilisateur?.email || ''} disabled
-            className="w-full px-3 py-2 rounded-lg border text-sm outline-none opacity-60"
+            className="w-full px-3 py-2 rounded-lg border text-sm outline-none opacity-50"
             style={inputStyle} />
         </div>
 
@@ -80,12 +80,12 @@ function Profil() {
         </div>
 
         {succes && (
-          <p className="text-xs" style={{ color: '#3B6D11' }}>✓ Profil mis à jour</p>
+          <p className="text-xs" style={{ color: '#6B8E4E' }}>✓ Profil mis à jour</p>
         )}
 
         <button type="submit" disabled={enregistrement}
-          className="px-4 py-2 rounded-lg text-sm font-medium self-start"
-          style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
+          className="px-4 py-2 rounded-lg text-sm font-semibold self-start transition-opacity"
+          style={{ background: '#F0B429', color: '#1E1912', opacity: enregistrement ? 0.6 : 1 }}>
           {enregistrement ? 'Enregistrement...' : 'Enregistrer'}
         </button>
       </form>
