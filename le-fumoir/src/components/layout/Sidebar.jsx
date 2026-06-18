@@ -5,6 +5,7 @@ import { usePanier } from '../../context/PanierContext'
 const navItems = [
   { path: '/boutique', label: 'Boutique', icon: '🛒' },
   { path: '/tutoriels', label: 'Tutoriels', icon: '📖' },
+  { path: '/calculatrice', label: 'Calculatrice', icon: '🧮' },
   { path: '/contact', label: 'Infos & Contact', icon: '✉️' },
 ]
 

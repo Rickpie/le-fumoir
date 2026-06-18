@@ -22,7 +22,7 @@ import MotDePasseOublie from './pages/MotDePasseOublie'
 import ReinitialiserMotDePasse from './pages/ReinitialiserMotDePasse'
 import Profil from './pages/Profil'
 import AdminMessages from './pages/admin/AdminMessages'
-
+import Calculatrice from './pages/Calculatrice'
 
 
 function App() {
@@ -40,6 +40,7 @@ function App() {
         <Route path="mot-de-passe-oublie" element={<MotDePasseOublie />} />
         <Route path="reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
         <Route path="profil" element={<Profil />} />
+        <Route path="calculatrice" element={<Calculatrice />} />
         <Route
           path="admin"
           element={
