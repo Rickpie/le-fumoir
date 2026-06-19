@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
+import SEO from '../components/SEO'
 
 function Connexion() {
   const { seConnecter } = useAuth()
@@ -28,6 +29,7 @@ function Connexion() {
 
   return (
     <div className="max-w-md mx-auto mt-10">
+      <SEO titre="Connexion — PC Le Fumoir" noindex />
       <h1 className="text-2xl font-medium mb-6" style={{ color: '#EDD98A' }}>Connexion</h1>
 
       {erreur && (

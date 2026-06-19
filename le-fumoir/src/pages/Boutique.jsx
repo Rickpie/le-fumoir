@@ -2,6 +2,7 @@
 import { supabase } from '../supabase'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SEO from '../components/SEO'
 
 function Boutique() {
   const [produits, setProduits] = useState([])
@@ -68,6 +69,11 @@ function Boutique() {
 
   return (
     <div>
+      <SEO
+        titre="Boutique — Charcuterie artisanale fumée | PC Le Fumoir"
+        description="Commandez vos viandes fumées et salées artisanales : jambons, magrets, saumons fumés, lard… Livraison ou remise en main propre."
+        url="/boutique"
+      />
       {/* Header */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">

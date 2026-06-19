@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '../supabase'
+import SEO from '../components/SEO'
 
 function useApparition() {
   const [visible, setVisible] = useState(false)
@@ -38,6 +39,20 @@ function Accueil() {
 
   return (
     <div className="flex flex-col gap-6">
+      <SEO
+        titre="PC Le Fumoir — Charcuterie artisanale fumée & Tutoriels de salaison"
+        description="Viandes fumées et salées artisanales sur commande. Jambons, magrets, saumons fumés… et des tutoriels pour apprendre à faire vos propres charcuteries maison."
+        url="/"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'LocalBusiness',
+          name: 'PC Le Fumoir',
+          description: 'Charcuterie fumée artisanale sur commande et tutoriels de salaison',
+          url: 'https://pc-fumoir.fr',
+          image: 'https://pc-fumoir.fr/og-image.jpg',
+          '@id': 'https://pc-fumoir.fr',
+        }}
+      />
 
       {/* Hero */}
       <div className="accueil-hero">

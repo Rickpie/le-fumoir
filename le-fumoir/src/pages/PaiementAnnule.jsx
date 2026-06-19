@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom'
+import SEO from '../components/SEO'
 
 function PaiementAnnule() {
   const navigate = useNavigate()
 
   return (
     <div className="max-w-lg mx-auto text-center py-20">
+      <SEO titre="Paiement annulé — PC Le Fumoir" noindex />
       <div className="text-6xl mb-6">↩️</div>
       <h1 className="text-2xl font-semibold mb-3" style={{ color: '#EDD98A' }}>
         Paiement annulé

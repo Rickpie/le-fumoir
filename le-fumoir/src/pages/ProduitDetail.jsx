@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { usePanier } from '../context/PanierContext'
+import SEO from '../components/SEO'
 
 
 function ProduitDetail() {
@@ -125,6 +126,12 @@ function ProduitDetail() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <SEO
+        titre={`${produit.nom} — PC Le Fumoir`}
+        description={produit.description ? produit.description.replace(/<[^>]*>/g, '').slice(0, 155) : `Découvrez ${produit.nom}, charcuterie artisanale fumée disponible sur commande chez PC Le Fumoir.`}
+        url={`/boutique/${produit.id}`}
+        image={produit.image_url || undefined}
+      />
       <button onClick={() => navigate('/boutique')}
         className="text-sm mb-6 flex items-center gap-1"
         style={{ color: '#FFFFFF' }}>

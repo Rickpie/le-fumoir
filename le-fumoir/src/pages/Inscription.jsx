@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
+import SEO from '../components/SEO'
 
 function Inscription() {
   const { sInscrire } = useAuth()
@@ -46,6 +47,7 @@ function Inscription() {
 
   return (
     <div className="max-w-md mx-auto mt-10">
+      <SEO titre="Créer un compte — PC Le Fumoir" noindex />
       <h1 className="text-2xl font-medium mb-6" style={{ color: '#EDD98A' }}>Créer un compte</h1>
 
       {erreur && (

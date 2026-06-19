@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react'
+import SEO from '../components/SEO'
 
 const CALCULATRICES = [
   { id: 'viande', label: 'Salaison sous-vide' },
@@ -237,6 +238,11 @@ function Calculatrice() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <SEO
+        titre="Calculatrice de salaison — Sel, épices & temps de séchage | PC Le Fumoir"
+        description="Calculez précisément les quantités de sel, d'épices et le temps de salage pour vos charcuteries maison : viandes sous-vide, saumon fumé, foie gras, saumure."
+        url="/calculatrice"
+      />
       <h1 className="text-2xl font-medium mb-2" style={{ color: '#EDD98A' }}>Calculatrice de salaison</h1>
       <p className="text-sm mb-6" style={{ color: '#FFFFFF' }}>
         Choisissez une recette et entrez le poids pour obtenir les quantités exactes.

@@ -63,6 +63,8 @@ function AdminReferentiel() {
     ])
 
     setCategories(cats || [])
+    const nextOrdre = Math.max(0, ...(cats || []).map(c => c.ordre || 0)) + 1
+    setNouvelleCat(prev => ({ ...prev, ordre: prev.ordre || String(nextOrdre) }))
     setMorceaux(morcs || [])
 
     const om = {}
@@ -87,12 +89,15 @@ function AdminReferentiel() {
   // ── CATÉGORIES ──────────────────────────────────────────────
   async function ajouterCategorie() {
     if (!nouvelleCat.nom.trim()) return
+    const ordre = parseInt(nouvelleCat.ordre) || (Math.max(0, ...categories.map(c => c.ordre || 0)) + 1)
     const { data } = await supabase.from('categories')
-      .insert({ nom: nouvelleCat.nom.trim(), ordre: parseInt(nouvelleCat.ordre) || 0, est_viande: nouvelleCat.est_viande })
+      .insert({ nom: nouvelleCat.nom.trim(), ordre, est_viande: nouvelleCat.est_viande })
       .select().single()
     if (data) {
-      setCategories(prev => [...prev, data].sort((a, b) => (a.ordre || 0) - (b.ordre || 0) || a.nom.localeCompare(b.nom, 'fr')))
-      setNouvelleCat({ nom: '', ordre: '', est_viande: false })
+      const newCats = [...categories, data]
+      setCategories(newCats.sort((a, b) => (a.ordre || 0) - (b.ordre || 0) || a.nom.localeCompare(b.nom, 'fr')))
+      const nextOrdre = Math.max(0, ...newCats.map(c => c.ordre || 0)) + 1
+      setNouvelleCat({ nom: '', ordre: String(nextOrdre), est_viande: false })
     }
   }
 
@@ -226,20 +231,21 @@ function AdminReferentiel() {
         profil_id: profilId,
         label: f.label.trim(),
         montant: parseFloat(f.montant),
+        quantite: parseInt(f.quantite) || 1,
         type_calcul: f.type_calcul || 'fixe',
         ordre: (fraisParProfil[profilId]?.length || 0) + 1,
       })
       .select().single()
     if (data) {
       setFraisParProfil(prev => ({ ...prev, [profilId]: [...(prev[profilId] || []), data] }))
-      setFraisForm(prev => ({ ...prev, [profilId]: { label: '', montant: '', type_calcul: 'fixe' } }))
+      setFraisForm(prev => ({ ...prev, [profilId]: { label: '', montant: '', quantite: '1', type_calcul: 'fixe' } }))
     }
   }
 
   async function sauvegarderFrais(fraisId) {
     const f = editFrais[fraisId]
     if (!f) return
-    const payload = { label: f.label, montant: parseFloat(f.montant), type_calcul: f.type_calcul || 'fixe' }
+    const payload = { label: f.label, montant: parseFloat(f.montant), quantite: parseInt(f.quantite) || 1, type_calcul: f.type_calcul || 'fixe' }
     await supabase.from('frais_variables_profil').update(payload).eq('id', fraisId)
     setFraisParProfil(prev => {
       const n = { ...prev }
@@ -271,7 +277,7 @@ function AdminReferentiel() {
 
     const fraisProf = fraisParProfil[m.profil_id] || []
     const totalVariables = fraisProf.reduce((s, f) => {
-      const montant = parseFloat(f.montant || 0)
+      const montant = parseFloat(f.montant || 0) * (parseInt(f.quantite) || 1)
       return s + (f.type_calcul === 'poids' ? (avgPoids / 1000) * montant : montant)
     }, 0)
 
@@ -341,8 +347,11 @@ function AdminReferentiel() {
                     <div className="flex-1 flex flex-wrap gap-2 items-center" onClick={e => e.stopPropagation()}>
                       <input value={editCat.nom} onChange={e => setEditCat(p => ({ ...p, nom: e.target.value }))}
                         className="flex-1 px-2 py-1 rounded border text-sm outline-none" style={inputStyle} placeholder="Nom" />
-                      <input type="number" value={editCat.ordre} onChange={e => setEditCat(p => ({ ...p, ordre: e.target.value }))}
-                        className="w-16 px-2 py-1 rounded border text-sm outline-none text-center" style={inputStyle} placeholder="Ordre" />
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs shrink-0" style={{ color: '#7A6A50' }}>Ordre</span>
+                        <input type="number" value={editCat.ordre} onChange={e => setEditCat(p => ({ ...p, ordre: e.target.value }))}
+                          className="w-14 px-2 py-1 rounded border text-sm outline-none text-center" style={inputStyle} />
+                      </div>
                       <button type="button"
                         onClick={() => setEditCat(p => ({ ...p, est_viande: !p.est_viande }))}
                         className="text-xs px-2 py-1 rounded font-medium"
@@ -357,6 +366,9 @@ function AdminReferentiel() {
                   ) : (
                     <div className="flex-1 flex items-center gap-2">
                       <span className="font-semibold text-sm" style={{ color: '#EDD98A' }}>{cat.nom}</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#1E1912', color: '#7A6A50', fontVariantNumeric: 'tabular-nums' }}>
+                        #{cat.ordre ?? '—'}
+                      </span>
                       {cat.est_viande && (
                         <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(176,58,46,0.15)', color: '#E07060', border: '1px solid rgba(176,58,46,0.3)' }}>🥩</span>
                       )}
@@ -615,8 +627,11 @@ function AdminReferentiel() {
                       <div className="flex-1 flex flex-wrap gap-2 items-center" onClick={e => e.stopPropagation()}>
                         <input value={editCat.nom} onChange={e => setEditCat(p => ({ ...p, nom: e.target.value }))}
                           className="flex-1 px-2 py-1 rounded border text-sm outline-none" style={inputStyle} placeholder="Nom" />
-                        <input type="number" value={editCat.ordre} onChange={e => setEditCat(p => ({ ...p, ordre: e.target.value }))}
-                          className="w-16 px-2 py-1 rounded border text-sm outline-none text-center" style={inputStyle} placeholder="Ordre" />
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs shrink-0" style={{ color: '#7A6A50' }}>Ordre</span>
+                          <input type="number" value={editCat.ordre} onChange={e => setEditCat(p => ({ ...p, ordre: e.target.value }))}
+                            className="w-14 px-2 py-1 rounded border text-sm outline-none text-center" style={inputStyle} />
+                        </div>
                         <button type="button"
                           onClick={() => setEditCat(p => ({ ...p, est_viande: !p.est_viande }))}
                           className="text-xs px-2 py-1 rounded font-medium"
@@ -689,7 +704,7 @@ function AdminReferentiel() {
             const frais = (fraisParProfil[profil.id] || []).sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
             const isOpen = profilOuvert.has(profil.id)
             const nbMorceaux = morceaux.filter(m => m.profil_id === profil.id).length
-            const totalFixe = frais.filter(f => f.type_calcul !== 'poids').reduce((s, f) => s + parseFloat(f.montant || 0), 0)
+            const totalFixe = frais.filter(f => f.type_calcul !== 'poids').reduce((s, f) => s + parseFloat(f.montant || 0) * (parseInt(f.quantite) || 1), 0)
             const nbFraisPoids = frais.filter(f => f.type_calcul === 'poids').length
 
             return (
@@ -736,7 +751,13 @@ function AdminReferentiel() {
                                 className="flex-1 px-2 py-1 rounded border text-xs outline-none" style={inputStyle} />
                               <input type="number" step="0.01" value={editFrais[f.id].montant}
                                 onChange={e => setEditFrais(p => ({ ...p, [f.id]: { ...p[f.id], montant: e.target.value } }))}
-                                className="w-20 px-2 py-1 rounded border text-xs outline-none text-right" style={inputStyle} />
+                                className="w-16 px-2 py-1 rounded border text-xs outline-none text-right" style={inputStyle} />
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs shrink-0" style={{ color: '#7A6A50' }}>×</span>
+                                <input type="number" min="1" value={editFrais[f.id].quantite || '1'}
+                                  onChange={e => setEditFrais(p => ({ ...p, [f.id]: { ...p[f.id], quantite: e.target.value } }))}
+                                  className="w-10 px-1 py-1 rounded border text-xs outline-none text-center" style={inputStyle} />
+                              </div>
                               <select value={editFrais[f.id].type_calcul || 'fixe'}
                                 onChange={e => setEditFrais(p => ({ ...p, [f.id]: { ...p[f.id], type_calcul: e.target.value } }))}
                                 className="px-1 py-1 rounded border text-xs outline-none" style={inputStyle}>
@@ -750,9 +771,12 @@ function AdminReferentiel() {
                             <>
                               <span className="flex-1 text-xs" style={{ color: '#FFFFFF' }}>{f.label}</span>
                               <span className="text-xs font-medium" style={{ color: '#F0B429' }}>
-                                {parseFloat(f.montant).toFixed(2)} {f.type_calcul === 'poids' ? '€/kg' : '€/pièce'}
+                                {(parseInt(f.quantite) || 1) > 1
+                                  ? <>{parseFloat(f.montant).toFixed(2)} × {parseInt(f.quantite)} = {(parseFloat(f.montant) * parseInt(f.quantite)).toFixed(2)} {f.type_calcul === 'poids' ? '€/kg' : '€/pièce'}</>
+                                  : <>{parseFloat(f.montant).toFixed(2)} {f.type_calcul === 'poids' ? '€/kg' : '€/pièce'}</>
+                                }
                               </span>
-                              <button onClick={() => setEditFrais(p => ({ ...p, [f.id]: { label: f.label, montant: f.montant, type_calcul: f.type_calcul || 'fixe' } }))}
+                              <button onClick={() => setEditFrais(p => ({ ...p, [f.id]: { label: f.label, montant: f.montant, quantite: String(f.quantite || 1), type_calcul: f.type_calcul || 'fixe' } }))}
                                 className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#3A2E1A', color: '#EDD98A' }}>✏️</button>
                               <button onClick={() => supprimerFrais(f.id, profil.id)}
                                 className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#3A2E1A', color: '#B03A2E' }}>✕</button>
@@ -778,10 +802,17 @@ function AdminReferentiel() {
                         value={fraisForm[profil.id]?.label || ''}
                         onChange={e => setFraisForm(p => ({ ...p, [profil.id]: { ...p[profil.id], label: e.target.value } }))}
                         className="flex-1 px-2 py-1.5 rounded border text-xs outline-none" style={inputStyle} />
-                      <input type="number" step="0.01" placeholder="montant"
+                      <input type="number" step="0.01" placeholder="€ unit."
                         value={fraisForm[profil.id]?.montant || ''}
                         onChange={e => setFraisForm(p => ({ ...p, [profil.id]: { ...p[profil.id], montant: e.target.value } }))}
-                        className="w-20 px-2 py-1.5 rounded border text-xs outline-none text-right" style={inputStyle} />
+                        className="w-16 px-2 py-1.5 rounded border text-xs outline-none text-right" style={inputStyle} />
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs" style={{ color: '#7A6A50' }}>×</span>
+                        <input type="number" min="1" placeholder="1"
+                          value={fraisForm[profil.id]?.quantite || ''}
+                          onChange={e => setFraisForm(p => ({ ...p, [profil.id]: { ...p[profil.id], quantite: e.target.value } }))}
+                          className="w-10 px-1 py-1.5 rounded border text-xs outline-none text-center" style={inputStyle} />
+                      </div>
                       <select value={fraisForm[profil.id]?.type_calcul || 'fixe'}
                         onChange={e => setFraisForm(p => ({ ...p, [profil.id]: { ...p[profil.id], type_calcul: e.target.value } }))}
                         className="px-1 py-1.5 rounded border text-xs outline-none" style={inputStyle}>

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { usePanier } from '../context/PanierContext'
+import SEO from '../components/SEO'
 
 function PaiementSucces() {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ function PaiementSucces() {
 
   return (
     <div className="max-w-lg mx-auto text-center py-20">
+      <SEO titre="Commande confirmée — PC Le Fumoir" noindex />
       <div className="text-6xl mb-6">🎉</div>
       <h1 className="text-2xl font-semibold mb-3" style={{ color: '#EDD98A' }}>
         Paiement confirmé !

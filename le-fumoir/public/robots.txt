@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /profil
+Disallow: /panier
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /paiement-succes
+Disallow: /paiement-annule
+
+Sitemap: https://pc-fumoir.fr/sitemap.xml
