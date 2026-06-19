@@ -7,6 +7,7 @@ import Accueil from './pages/Accueil'
 import Boutique from './pages/Boutique'
 import Tutoriels from './pages/Tutoriels'
 import Contact from './pages/Contact'
+import FAQ from './pages/FAQ'
 import Connexion from './pages/Connexion'
 import Inscription from './pages/Inscription'
 import Admin from './pages/Admin'
@@ -14,7 +15,8 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminOptions from './pages/admin/AdminOptions'
 import AdminProduits from './pages/admin/AdminProduits'
 import AdminMiseEnVente from './pages/admin/AdminMiseEnVente'
-import AdminCommandes from './pages/admin/AdminCommandes'
+import AdminCommandesActives from './pages/admin/AdminCommandesActives'
+import AdminCommandesHistorique from './pages/admin/AdminCommandesHistorique'
 import AdminTutoriels from './pages/admin/AdminTutoriels'
 import AdminPacks from './pages/admin/AdminPacks'
 import AdminFichiers from './pages/admin/AdminFichiers'
@@ -35,6 +37,11 @@ import PaiementSucces from './pages/PaiementSucces'
 import PaiementAnnule from './pages/PaiementAnnule'
 import Calculatrice from './pages/Calculatrice'
 import NotFound from './pages/NotFound'
+import APropos from './pages/APropos'
+import AdminPromos from './pages/admin/AdminPromos'
+import AdminAvis from './pages/admin/AdminAvis'
+import AdminFAQ from './pages/admin/AdminFAQ'
+import AdminCategoriesTutoriels from './pages/admin/AdminCategoriesTutoriels'
 
 
 function App() {
@@ -45,6 +52,8 @@ function App() {
         <Route index element={<Accueil />} />
         <Route path="boutique" element={<Boutique />} />
         <Route path="tutoriels" element={<Tutoriels />} />
+        <Route path="a-propos" element={<APropos />} />
+        <Route path="faq" element={<FAQ />} />
         <Route path="contact" element={<Contact />} />
         <Route path="connexion" element={<Connexion />} />
         <Route path="inscription" element={<Inscription />} />
@@ -69,7 +78,8 @@ function App() {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="mise-en-vente" element={<AdminMiseEnVente />} />
           <Route path="produits" element={<AdminProduits />} />
-          <Route path="commandes" element={<AdminCommandes />} />
+          <Route path="commandes" element={<AdminCommandesActives />} />
+          <Route path="historique-commandes" element={<AdminCommandesHistorique />} />
           <Route path="tutoriels" element={<AdminTutoriels />} />
           <Route path="packs" element={<AdminPacks />} />
           <Route path="fichiers" element={<AdminFichiers />} />
@@ -81,6 +91,10 @@ function App() {
           <Route path="clients" element={<AdminClients />} />
           <Route path="contact" element={<AdminContact />} />
           <Route path="messages" element={<AdminMessages />} />
+          <Route path="promos" element={<AdminPromos />} />
+          <Route path="avis" element={<AdminAvis />} />
+          <Route path="faq" element={<AdminFAQ />} />
+          <Route path="categories-tutoriels" element={<AdminCategoriesTutoriels />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

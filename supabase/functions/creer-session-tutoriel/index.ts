@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
         quantity: 1,
       }],
       mode: 'payment',
+      allow_promotion_codes: true,
       success_url: `${siteUrl}/tutoriels?achat=succes&type=${type}`,
       cancel_url: `${siteUrl}/tutoriels`,
       customer_email: user.email,

@@ -2,6 +2,148 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { useAuth } from '../context/AuthContext'
+import SEO from '../components/SEO'
+
+const ETOILES = [1, 2, 3, 4, 5]
+
+function AffichageEtoiles({ note, taille = '14px' }) {
+  return (
+    <span>
+      {ETOILES.map(n => (
+        <span key={n} style={{ color: n <= note ? '#F0B429' : '#4A3820', fontSize: taille }}>★</span>
+      ))}
+    </span>
+  )
+}
+
+function SectionAvis({ tutoId, utilisateur }) {
+  const [avis, setAvis] = useState([])
+  const [monAvis, setMonAvis] = useState(null)
+  const [form, setForm] = useState({ note: 0, commentaire: '' })
+  const [survol, setSurvol] = useState(0)
+  const [envoi, setEnvoi] = useState(false)
+  const [afficherForm, setAfficherForm] = useState(false)
+
+  useEffect(() => {
+    chargerAvis()
+    if (utilisateur?.id) chargerMonAvis()
+  }, [tutoId, utilisateur?.id])
+
+  async function chargerAvis() {
+    const { data } = await supabase
+      .from('avis')
+      .select('note, commentaire, cree_le, profils:profil_id (prenom)')
+      .eq('tutoriel_id', tutoId)
+      .eq('approuve', true)
+      .order('cree_le', { ascending: false })
+    setAvis(data || [])
+  }
+
+  async function chargerMonAvis() {
+    const { data } = await supabase
+      .from('avis')
+      .select('*')
+      .eq('tutoriel_id', tutoId)
+      .eq('profil_id', utilisateur.id)
+      .maybeSingle()
+    setMonAvis(data)
+    if (data) setForm({ note: data.note, commentaire: data.commentaire || '' })
+  }
+
+  async function soumettre(e) {
+    e.preventDefault()
+    if (form.note === 0) return
+    setEnvoi(true)
+    await supabase.from('avis').upsert({
+      tutoriel_id: tutoId,
+      profil_id: utilisateur.id,
+      note: form.note,
+      commentaire: form.commentaire,
+      approuve: false,
+    }, { onConflict: 'profil_id,tutoriel_id' })
+    await chargerMonAvis()
+    setAfficherForm(false)
+    setEnvoi(false)
+  }
+
+  const moyenne = avis.length > 0 ? (avis.reduce((s, a) => s + a.note, 0) / avis.length) : null
+
+  return (
+    <div className="mt-8 pt-6" style={{ borderTop: '1px solid #4A3820' }}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold" style={{ color: '#EDD98A' }}>
+          Avis {avis.length > 0 && `(${avis.length})`}
+        </h3>
+        {moyenne && (
+          <div className="flex items-center gap-2">
+            <AffichageEtoiles note={Math.round(moyenne)} />
+            <span className="text-xs" style={{ color: '#FFFFFF' }}>{moyenne.toFixed(1)}/5</span>
+          </div>
+        )}
+      </div>
+
+      {utilisateur && !afficherForm && (
+        <button onClick={() => setAfficherForm(true)}
+          className="text-xs px-3 py-1.5 rounded-lg mb-4"
+          style={{ background: 'rgba(240,180,41,0.15)', color: '#F0B429', border: '1px solid rgba(240,180,41,0.3)' }}>
+          {monAvis ? 'Modifier mon avis' : '+ Laisser un avis'}
+        </button>
+      )}
+
+      {afficherForm && (
+        <form onSubmit={soumettre} className="rounded-xl border p-4 mb-5"
+          style={{ background: '#1E1912', borderColor: '#4A3820' }}>
+          <p className="text-xs font-medium mb-2" style={{ color: '#FFFFFF' }}>Votre note *</p>
+          <div className="flex gap-1 mb-3">
+            {ETOILES.map(n => (
+              <button key={n} type="button"
+                onClick={() => setForm(p => ({ ...p, note: n }))}
+                onMouseEnter={() => setSurvol(n)}
+                onMouseLeave={() => setSurvol(0)}
+                style={{ fontSize: '24px', color: n <= (survol || form.note) ? '#F0B429' : '#4A3820', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px' }}>
+                ★
+              </button>
+            ))}
+          </div>
+          <textarea value={form.commentaire} onChange={e => setForm(p => ({ ...p, commentaire: e.target.value }))}
+            placeholder="Votre commentaire (optionnel)" rows={3}
+            className="w-full px-3 py-2 rounded-lg border text-sm outline-none resize-none mb-3"
+            style={{ background: '#2C2518', borderColor: '#4A3820', color: '#EDD98A' }} />
+          <div className="flex gap-2">
+            <button type="submit" disabled={!form.note || envoi}
+              className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+              style={{ background: '#F0B429', color: '#1E1912', opacity: !form.note || envoi ? 0.5 : 1 }}>
+              {envoi ? 'Envoi...' : 'Envoyer'}
+            </button>
+            <button type="button" onClick={() => setAfficherForm(false)}
+              className="text-xs px-3 py-1.5 rounded-lg"
+              style={{ background: 'transparent', color: '#FFFFFF', border: '1px solid #4A3820' }}>
+              Annuler
+            </button>
+          </div>
+          <p className="text-xs mt-2" style={{ color: '#7A6A50' }}>Votre avis sera visible après modération.</p>
+        </form>
+      )}
+
+      {avis.length === 0 ? (
+        <p className="text-xs" style={{ color: '#7A6A50' }}>Aucun avis pour le moment. Soyez le premier !</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {avis.map((a, i) => (
+            <div key={i} className="rounded-xl border p-3" style={{ background: '#1E1912', borderColor: '#4A3820' }}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold" style={{ color: '#EDD98A' }}>{a.profils?.prenom || 'Anonyme'}</span>
+                <AffichageEtoiles note={a.note} taille="12px" />
+              </div>
+              {a.commentaire && <p className="text-xs italic" style={{ color: '#FFFFFF' }}>« {a.commentaire} »</p>}
+              <p className="text-xs mt-1" style={{ color: '#7A6A50' }}>{new Date(a.cree_le).toLocaleDateString('fr-FR')}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const CARD_STYLE = {
   background: '#2C2518',
@@ -46,8 +188,18 @@ function CarteTutoriel({ tuto, onOuvrir, estAdmin, onModifier, onSupprimer, acce
       </div>
       <div className="p-4 flex flex-col flex-1">
         <h3 className="font-semibold text-sm mb-1 leading-snug" style={{ color: '#EDD98A' }}>{tuto.titre}</h3>
-        {tuto.sous_titre && <p className="text-xs line-clamp-2 flex-1" style={{ color: '#FFFFFF' }}>{tuto.sous_titre}</p>}
-        <div className="mt-3 pt-3 flex items-center justify-end" style={{ borderTop: '1px solid #4A3820' }}>
+        {tuto.sous_titre && <p className="text-xs line-clamp-2" style={{ color: '#FFFFFF' }}>{tuto.sous_titre}</p>}
+        {tuto.tutoriel_categories?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {tuto.tutoriel_categories.map(tc => tc.categorie_tutoriels && (
+              <span key={tc.categorie_id} className="text-xs px-1.5 py-0.5 rounded-md font-medium"
+                style={{ background: `${tc.categorie_tutoriels.couleur}20`, color: tc.categorie_tutoriels.couleur, border: `1px solid ${tc.categorie_tutoriels.couleur}40` }}>
+                {tc.categorie_tutoriels.icone} {tc.categorie_tutoriels.nom}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="mt-3 pt-3 flex items-center justify-end" style={{ borderTop: '1px solid #4A3820', marginTop: 'auto' }}>
           <span className="text-xs font-medium" style={{ color: achete ? '#6B8E4E' : '#F0B429' }}>
             {tuto.gratuit || achete ? 'Lire →' : 'Voir le tutoriel →'}
           </span>
@@ -66,6 +218,9 @@ function Tutoriels() {
   const [contenuPack, setContenuPack] = useState(null)
   const [chargement, setChargement] = useState(true)
   const [achatEnCours, setAchatEnCours] = useState(false)
+  const [recherche, setRecherche] = useState('')
+  const [toutesCategories, setToutesCategories] = useState([])
+  const [categorieFiltre, setCategorieFiltre] = useState(null)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { profil, utilisateur } = useAuth()
@@ -84,9 +239,9 @@ function Tutoriels() {
   }, [utilisateur?.id])
 
   async function chargerDonnees() {
-    const [{ data: tutos }, { data: pks }] = await Promise.all([
+    const [{ data: tutos }, { data: pks }, { data: cats }] = await Promise.all([
       supabase.from('tutoriels')
-        .select('id, titre, sous_titre, gratuit, prix, photo_url, visible, ordre, created_at')
+        .select('id, titre, sous_titre, gratuit, prix, photo_url, visible, ordre, created_at, tutoriel_categories(categorie_id, categorie_tutoriels(nom, couleur, icone))')
         .eq('visible', true)
         .order('gratuit', { ascending: false })
         .order('ordre', { ascending: true })
@@ -95,9 +250,14 @@ function Tutoriels() {
         .select('*')
         .eq('visible', true)
         .order('created_at', { ascending: false }),
+      supabase.from('categorie_tutoriels')
+        .select('*')
+        .order('ordre')
+        .order('nom'),
     ])
     setTutoriels(tutos || [])
     setPacks(pks || [])
+    setToutesCategories(cats || [])
     setChargement(false)
   }
 
@@ -352,6 +512,9 @@ function Tutoriels() {
                   </a>
                 </div>
               )}
+              {!tutoSelectionne.gratuit && (
+                <SectionAvis tutoId={tutoSelectionne.id} utilisateur={utilisateur} />
+              )}
             </>
           ) : (
             <div className="text-center py-10 rounded-xl" style={{ background: '#1E1912', border: '1px solid #4A3820' }}>
@@ -377,12 +540,63 @@ function Tutoriels() {
   }
 
   // VUE LISTE
-  const gratuits = tutoriels.filter(t => t.gratuit)
-  const payants = tutoriels.filter(t => !t.gratuit)
+  const terme = recherche.toLowerCase().trim()
+  const tutosFiltres = tutoriels.filter(t => {
+    const matchTexte = !terme || t.titre?.toLowerCase().includes(terme) || t.sous_titre?.toLowerCase().includes(terme)
+    const matchCat = !categorieFiltre || t.tutoriel_categories?.some(tc => tc.categorie_id === categorieFiltre)
+    return matchTexte && matchCat
+  })
+  const packsFiltres = packs.filter(p =>
+    !terme || p.titre?.toLowerCase().includes(terme) || p.description?.toLowerCase().includes(terme)
+  )
+  const gratuits = tutosFiltres.filter(t => t.gratuit)
+  const payants = tutosFiltres.filter(t => !t.gratuit)
 
   return (
     <div>
-      <h1 className="text-2xl font-medium mb-6" style={{ color: '#EDD98A' }}>Tutoriels</h1>
+      <SEO titre="Tutoriels — PC Le Fumoir" description="Apprenez la salaison et le fumage avec nos tutoriels détaillés. Techniques, recettes, guides complets pour débutants et confirmés." />
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+        <h1 className="text-2xl font-medium" style={{ color: '#EDD98A' }}>Tutoriels</h1>
+        <div className="relative sm:ml-auto">
+          <input
+            type="text"
+            placeholder="Rechercher un tutoriel..."
+            value={recherche}
+            onChange={e => setRecherche(e.target.value)}
+            className="w-full sm:w-64 px-3 py-2 pl-8 rounded-lg border text-sm outline-none"
+            style={{ background: '#2C2518', borderColor: '#4A3820', color: '#EDD98A' }}
+          />
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: '#7A6A50' }}>🔍</span>
+          {recherche && (
+            <button onClick={() => setRecherche('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs"
+              style={{ color: '#7A6A50' }}>✕</button>
+          )}
+        </div>
+      </div>
+
+      {toutesCategories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-5">
+          <button
+            onClick={() => setCategorieFiltre(null)}
+            className="text-xs px-3 py-1.5 rounded-full font-medium transition-all"
+            style={!categorieFiltre
+              ? { background: '#F0B429', color: '#1E1912' }
+              : { background: 'transparent', color: '#FFFFFF', border: '1px solid #4A3820' }}>
+            Tous
+          </button>
+          {toutesCategories.map(cat => (
+            <button key={cat.id}
+              onClick={() => setCategorieFiltre(categorieFiltre === cat.id ? null : cat.id)}
+              className="text-xs px-3 py-1.5 rounded-full font-medium transition-all"
+              style={categorieFiltre === cat.id
+                ? { background: cat.couleur, color: '#1E1912' }
+                : { background: `${cat.couleur}18`, color: cat.couleur, border: `1px solid ${cat.couleur}40` }}>
+              {cat.icone} {cat.nom}
+            </button>
+          ))}
+        </div>
+      )}
 
       {achatSucces && (
         <div className="mb-6 p-4 rounded-xl flex items-center gap-3"
@@ -398,6 +612,14 @@ function Tutoriels() {
         <div className="text-center py-16" style={{ color: '#FFFFFF' }}>
           <p className="text-4xl mb-3">📖</p>
           <p className="text-sm">Aucun tutoriel disponible pour le moment.</p>
+        </div>
+      ) : tutosFiltres.length === 0 && packsFiltres.length === 0 ? (
+        <div className="text-center py-16" style={{ color: '#FFFFFF' }}>
+          <p className="text-4xl mb-3">🔍</p>
+          <p className="text-sm">Aucun résultat pour « {recherche} »</p>
+          <button onClick={() => setRecherche('')} className="mt-3 text-xs underline" style={{ color: '#F0B429' }}>
+            Effacer la recherche
+          </button>
         </div>
       ) : (
         <>
@@ -432,11 +654,11 @@ function Tutoriels() {
         </>
       )}
 
-      {packs.length > 0 && (
+      {packsFiltres.length > 0 && (
         <div className="mt-10">
           <h2 className="text-xs font-semibold mb-3 uppercase tracking-widest" style={{ color: '#FFFFFF' }}>Packs disponibles</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {packs.map(pack => {
+            {packsFiltres.map(pack => {
               const packAchete = !estAdmin && achats.some(a => a.pack_id === pack.id)
               return (
               <div key={pack.id} onClick={() => ouvrirPack(pack)}

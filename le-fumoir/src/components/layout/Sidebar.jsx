@@ -1,18 +1,37 @@
-﻿import { NavLink, useNavigate, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { usePanier } from '../../context/PanierContext'
+import { supabase } from '../../supabase'
 
 const navItems = [
   { path: '/boutique', label: 'Boutique', icon: '🛒' },
   { path: '/tutoriels', label: 'Tutoriels', icon: '📖' },
   { path: '/calculatrice', label: 'Calculatrice', icon: '🧮' },
-  { path: '/contact', label: 'Infos & Contact', icon: '✉️' },
+  { path: '/a-propos', label: 'À propos', icon: '🔥' },
+  { path: '/faq', label: 'FAQ', icon: '❓' },
+  { path: '/contact', label: 'Nous contacter', icon: '✉️' },
 ]
 
 function Sidebar() {
   const { utilisateur, profil, seDeconnecter } = useAuth()
   const { nombreArticles } = usePanier()
   const navigate = useNavigate()
+  const [notifAdmin, setNotifAdmin] = useState(0)
+  const estAdmin = profil?.role === 'admin'
+
+  useEffect(() => {
+    if (!estAdmin) return
+    chargerNotifs()
+  }, [estAdmin])
+
+  async function chargerNotifs() {
+    const [{ count: msgs }, { count: cmds }] = await Promise.all([
+      supabase.from('messages_contact').select('*', { count: 'exact', head: true }).eq('lu', false),
+      supabase.from('commandes').select('*', { count: 'exact', head: true }).in('statut', ['en_attente', 'autorisee']),
+    ])
+    setNotifAdmin((msgs || 0) + (cmds || 0))
+  }
 
   async function handleDeconnexion() {
     try {
@@ -47,9 +66,7 @@ function Sidebar() {
             to={item.path}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 text-sm transition-all border-l-2 ` +
-              (isActive
-                ? 'border-yellow-500 bg-yellow-500/10'
-                : 'border-transparent hover:bg-white/5')
+              (isActive ? 'border-yellow-500 bg-yellow-500/10' : 'border-transparent hover:bg-white/5')
             }
             style={({ isActive }) => ({ color: isActive ? '#F0B429' : '#FFFFFF' })}
           >
@@ -59,19 +76,25 @@ function Sidebar() {
         ))}
 
         {/* Lien Admin si admin */}
-        {profil?.role === 'admin' && (
+        {estAdmin && (
           <NavLink
             to="/admin"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 text-sm transition-all border-l-2 ` +
-              (isActive
-                ? 'border-yellow-500 bg-yellow-500/10'
-                : 'border-transparent hover:bg-white/5')
+              (isActive ? 'border-yellow-500 bg-yellow-500/10' : 'border-transparent hover:bg-white/5')
             }
             style={({ isActive }) => ({ color: isActive ? '#F0B429' : '#FFFFFF' })}
           >
             <span>⚙️</span>
-            <span>Admin</span>
+            <span className="flex-1">Admin</span>
+            {notifAdmin > 0 && (
+              <span style={{
+                fontSize: '0.65rem', padding: '1px 6px', borderRadius: '999px',
+                background: '#B03A2E', color: '#fff', fontWeight: '700', lineHeight: 1.4,
+              }}>
+                {notifAdmin > 99 ? '99+' : notifAdmin}
+              </span>
+            )}
           </NavLink>
         )}
       </nav>
@@ -94,9 +117,7 @@ function Sidebar() {
               to="/profil"
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-2.5 text-sm transition-all border-l-2 ` +
-                (isActive
-                  ? 'border-yellow-500 bg-yellow-500/10'
-                  : 'border-transparent hover:bg-white/5')
+                (isActive ? 'border-yellow-500 bg-yellow-500/10' : 'border-transparent hover:bg-white/5')
               }
               style={({ isActive }) => ({ color: isActive ? '#F0B429' : '#FFFFFF' })}
             >
@@ -117,9 +138,7 @@ function Sidebar() {
             to="/connexion"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 text-sm transition-all border-l-2 ` +
-              (isActive
-                ? 'border-yellow-500 bg-yellow-500/10'
-                : 'border-transparent hover:bg-white/5')
+              (isActive ? 'border-yellow-500 bg-yellow-500/10' : 'border-transparent hover:bg-white/5')
             }
             style={({ isActive }) => ({ color: isActive ? '#F0B429' : '#FFFFFF' })}
           >

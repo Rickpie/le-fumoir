@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
       line_items: lineItems,
       mode: 'payment',
       payment_intent_data: { capture_method: 'manual' },
+      allow_promotion_codes: true,
       success_url: `${siteUrl}/paiement-succes?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/paiement-annule`,
       customer_email: userEmail ?? undefined,

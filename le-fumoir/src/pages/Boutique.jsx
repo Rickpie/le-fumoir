@@ -7,6 +7,7 @@ function Boutique() {
   const [produits, setProduits] = useState([])
   const [categories, setCategories] = useState([])
   const [categorieActive, setCategorieActive] = useState(null)
+  const [recherche, setRecherche] = useState('')
   const [chargement, setChargement] = useState(true)
   const navigate = useNavigate()
   const { profil } = useAuth()
@@ -52,9 +53,12 @@ function Boutique() {
     navigate(`/admin/produits?edit=${produitId}`)
   }
 
-  const produitsFiltres = categorieActive
-    ? produits.filter(p => p.categorie_id === categorieActive)
-    : produits
+  const terme = recherche.toLowerCase().trim()
+  const produitsFiltres = produits.filter(p => {
+    const matchCat = !categorieActive || p.categorie_id === categorieActive
+    const matchTexte = !terme || p.nom?.toLowerCase().includes(terme) || p.description?.toLowerCase().includes(terme)
+    return matchCat && matchTexte
+  })
 
   if (chargement) return (
     <div className="flex items-center justify-center h-40">
@@ -66,8 +70,26 @@ function Boutique() {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-medium" style={{ color: '#EDD98A' }}>Boutique</h1>
-        <div className="mt-3 p-4 rounded-xl text-sm" style={{ background: '#2C2518', color: '#EDD98A', border: '1px solid #4A3820' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+          <h1 className="text-2xl font-medium" style={{ color: '#EDD98A' }}>Boutique</h1>
+          <div className="relative sm:ml-auto">
+            <input
+              type="text"
+              placeholder="Rechercher un produit..."
+              value={recherche}
+              onChange={e => setRecherche(e.target.value)}
+              className="w-full sm:w-64 px-3 py-2 pl-8 rounded-lg border text-sm outline-none"
+              style={{ background: '#2C2518', borderColor: '#4A3820', color: '#EDD98A' }}
+            />
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: '#7A6A50' }}>🔍</span>
+            {recherche && (
+              <button onClick={() => setRecherche('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs"
+                style={{ color: '#7A6A50' }}>✕</button>
+            )}
+          </div>
+        </div>
+        <div className="p-4 rounded-xl text-sm" style={{ background: '#2C2518', color: '#EDD98A', border: '1px solid #4A3820' }}>
           🔥 Tous nos produits sont préparés à la commande. Vous pouvez recevoir votre pièce <strong style={{ color: '#F0B429' }}>prête à déguster</strong> (délai selon le produit) ou opter pour la version <strong style={{ color: '#F0B429' }}>à faire sécher vous-même</strong> à la maison, avec nos conseils inclus.
         </div>
       </div>
@@ -104,8 +126,21 @@ function Boutique() {
       {/* Grille de produits */}
       {produitsFiltres.length === 0 ? (
         <div className="text-center py-16" style={{ color: '#FFFFFF' }}>
-          <p className="text-4xl mb-3">🔥</p>
-          <p className="text-sm">Aucun produit disponible pour le moment.</p>
+          {terme || categorieActive ? (
+            <>
+              <p className="text-4xl mb-3">🔍</p>
+              <p className="text-sm mb-3">Aucun produit ne correspond à votre recherche.</p>
+              <button onClick={() => { setRecherche(''); setCategorieActive(null) }}
+                className="text-xs underline" style={{ color: '#F0B429' }}>
+                Effacer les filtres
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-4xl mb-3">🔥</p>
+              <p className="text-sm">Aucun produit disponible pour le moment.</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

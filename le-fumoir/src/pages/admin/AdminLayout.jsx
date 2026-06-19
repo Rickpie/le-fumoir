@@ -7,41 +7,51 @@ const adminNav = [
     groupe: null,
     items: [
       { path: '/admin', label: 'Dashboard', icon: '📊', exact: true },
+      { path: '/admin/messages', label: 'Messages', icon: '📬', badge: true },
     ],
   },
   {
     groupe: 'Boutique',
     items: [
-      { path: '/admin/mise-en-vente', label: 'Mise en vente', icon: '🆕' },
-      { path: '/admin/produits', label: 'Ventes en cours', icon: '🥩' },
-      { path: '/admin/commandes', label: 'Commandes', icon: '📦' },
+      { path: '/admin/mise-en-vente', label: 'Nouveau produit', icon: '🆕' },
+      { path: '/admin/produits', label: 'Produits en vente', icon: '🥩' },
+      { path: '/admin/commandes', label: 'Commandes actives', icon: '📦' },
+      { path: '/admin/historique-commandes', label: 'Historique', icon: '📋' },
       { path: '/admin/factures', label: 'Factures', icon: '🧾' },
+    ],
+  },
+  {
+    groupe: 'Tutoriels',
+    items: [
+      { path: '/admin/tutoriels', label: 'Gérer les tutoriels', icon: '📖' },
+      { path: '/admin/fichiers', label: 'Fichiers à vendre', icon: '📄' },
+      { path: '/admin/doc-sechage', label: 'Guide séchage', icon: '🌡️' },
+    ],
+  },
+  {
+    groupe: 'Configuration ventes',
+    items: [
+      { path: '/admin/categories', label: 'Catégories boutique', icon: '🏷️' },
+      { path: '/admin/categories-tutoriels', label: 'Catégories tutoriels', icon: '🏷️' },
+      { path: '/admin/options', label: 'Épices & Inserts', icon: '🧂' },
       { path: '/admin/packs', label: 'Packs', icon: '🎁' },
+      { path: '/admin/parametres-facturation', label: 'Modèle de facture', icon: '📝' },
     ],
   },
   {
     groupe: 'Contenu du site',
     items: [
       { path: '/admin/accueil', label: "Page d'accueil", icon: '🏠' },
-      { path: '/admin/doc-sechage', label: 'Guide séchage', icon: '📋' },
-      { path: '/admin/tutoriels', label: 'Tutoriels', icon: '📖' },
-      { path: '/admin/fichiers', label: 'Fichiers', icon: '📄' },
+      { path: '/admin/faq', label: 'FAQ', icon: '❓' },
+      { path: '/admin/contact', label: 'Page contact', icon: '✉️' },
     ],
   },
   {
-    groupe: 'Configuration',
-    items: [
-      { path: '/admin/categories', label: 'Catégories', icon: '🏷️' },
-      { path: '/admin/options', label: 'Épices & Inserts', icon: '🧂' },
-      { path: '/admin/contact', label: 'Infos & Contact', icon: '✉️' },
-      { path: '/admin/parametres-facturation', label: 'Facturation', icon: '🧾' },
-    ],
-  },
-  {
-    groupe: 'Clients',
+    groupe: 'Communauté',
     items: [
       { path: '/admin/clients', label: 'Clients', icon: '👥' },
-      { path: '/admin/messages', label: 'Messages', icon: '📬', badge: true },
+      { path: '/admin/avis', label: 'Avis clients', icon: '⭐' },
+      { path: '/admin/promos', label: 'Codes promo', icon: '🎟️' },
     ],
   },
 ]
@@ -50,9 +60,7 @@ function AdminLayout() {
   const [messagesNonLus, setMessagesNonLus] = useState(0)
   const [sidebarOuverte, setSidebarOuverte] = useState(false)
 
-  useEffect(() => {
-    chargerCompteur()
-  }, [])
+  useEffect(() => { chargerCompteur() }, [])
 
   async function chargerCompteur() {
     const { count } = await supabase
@@ -110,13 +118,8 @@ function AdminLayout() {
             <div key={si} style={{ marginBottom: section.groupe ? '4px' : '0' }}>
               {section.groupe && (
                 <p style={{
-                  fontSize: '0.65rem',
-                  fontWeight: '700',
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  color: '#7A6A50',
-                  padding: '12px 14px 4px',
-                  margin: 0,
+                  fontSize: '0.65rem', fontWeight: '700', letterSpacing: '0.1em',
+                  textTransform: 'uppercase', color: '#7A6A50', padding: '12px 14px 4px', margin: 0,
                 }}>
                   {section.groupe}
                 </p>
@@ -136,12 +139,8 @@ function AdminLayout() {
                   <span style={{ flex: 1 }}>{item.label}</span>
                   {item.badge && messagesNonLus > 0 && (
                     <span style={{
-                      fontSize: '0.7rem',
-                      padding: '1px 7px',
-                      borderRadius: '999px',
-                      background: '#B03A2E',
-                      color: '#fff',
-                      fontWeight: '600',
+                      fontSize: '0.7rem', padding: '1px 7px', borderRadius: '999px',
+                      background: '#B03A2E', color: '#fff', fontWeight: '600',
                     }}>
                       {messagesNonLus}
                     </span>
@@ -154,13 +153,9 @@ function AdminLayout() {
 
         {/* Contenu */}
         <main style={{
-          flex: 1,
-          minWidth: 0,
-          padding: '1.5rem 1.75rem',
-          background: '#1E1912',
-          borderRadius: '0 1rem 1rem 0',
-          border: '1px solid #4A3820',
-          borderLeft: 'none',
+          flex: 1, minWidth: 0, padding: '1.5rem 1.75rem',
+          background: '#1E1912', borderRadius: '0 1rem 1rem 0',
+          border: '1px solid #4A3820', borderLeft: 'none',
         }}>
           <Outlet />
         </main>

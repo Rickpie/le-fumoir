@@ -3,25 +3,36 @@ import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../supabase'
 import UploadPhoto from '../../components/UploadPhoto'
 import EditeurTexte from '../../components/EditeurTexte'
+import SelectMultiple from '../../components/SelectMultiple'
 
 function AdminTutoriels() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [tutoriels, setTutoriels] = useState([])
+  const [categories, setCategories] = useState([])
   const [chargement, setChargement] = useState(true)
   const [formulaireOuvert, setFormulaireOuvert] = useState(false)
   const [tutoEnEdition, setTutoEnEdition] = useState(null)
 
   const [form, setForm] = useState({
     titre: '', sous_titre: '', contenu: '', photo_url: '', gratuit: true, prix: '',
+    categoriesSelectionnees: [],
   })
   const [generationPdf, setGenerationPdf] = useState(false)
 
-  useEffect(() => { chargerTutoriels() }, [])
+  useEffect(() => {
+    chargerTutoriels()
+    chargerCategories()
+  }, [])
+
+  async function chargerCategories() {
+    const { data } = await supabase.from('categorie_tutoriels').select('*').order('ordre').order('nom')
+    setCategories(data || [])
+  }
 
   async function chargerTutoriels() {
     const { data } = await supabase
       .from('tutoriels')
-      .select('*')
+      .select('*, tutoriel_categories(categorie_id)')
       .order('gratuit', { ascending: false })
       .order('ordre', { ascending: true })
       .order('created_at', { ascending: true })
@@ -80,7 +91,7 @@ function AdminTutoriels() {
 
   function ouvrirNouveau() {
     setTutoEnEdition(null)
-    setForm({ titre: '', sous_titre: '', contenu: '', photo_url: '', gratuit: true, prix: '' })
+    setForm({ titre: '', sous_titre: '', contenu: '', photo_url: '', gratuit: true, prix: '', categoriesSelectionnees: [] })
     setFormulaireOuvert(true)
   }
 
@@ -93,8 +104,18 @@ function AdminTutoriels() {
       photo_url: tuto.photo_url || '',
       gratuit: tuto.gratuit,
       prix: tuto.prix || '',
+      categoriesSelectionnees: (tuto.tutoriel_categories || []).map(tc => tc.categorie_id),
     })
     setFormulaireOuvert(true)
+  }
+
+  function toggleCategorie(catId) {
+    setForm(prev => ({
+      ...prev,
+      categoriesSelectionnees: prev.categoriesSelectionnees.includes(catId)
+        ? prev.categoriesSelectionnees.filter(id => id !== catId)
+        : [...prev.categoriesSelectionnees, catId],
+    }))
   }
 
   async function genererEtUploaderPDF(titre, contenu, tutoId) {
@@ -237,15 +258,26 @@ function AdminTutoriels() {
       tutoId = inserted?.id
     }
 
-    if (form.contenu && tutoId) {
-      setGenerationPdf(true)
-      try {
-        const pdfUrl = await genererEtUploaderPDF(form.titre, form.contenu, tutoId)
-        await supabase.from('tutoriels').update({ pdf_url: pdfUrl }).eq('id', tutoId)
-      } catch (err) {
-        alert('Le PDF n\'a pas pu être généré : ' + err.message)
+    if (tutoId) {
+      // Sauvegarder les catégories
+      await supabase.from('tutoriel_categories').delete().eq('tutoriel_id', tutoId)
+      if (form.categoriesSelectionnees.length > 0) {
+        await supabase.from('tutoriel_categories').insert(
+          form.categoriesSelectionnees.map(catId => ({ tutoriel_id: tutoId, categorie_id: catId }))
+        )
       }
-      setGenerationPdf(false)
+
+      // Générer le PDF
+      if (form.contenu) {
+        setGenerationPdf(true)
+        try {
+          const pdfUrl = await genererEtUploaderPDF(form.titre, form.contenu, tutoId)
+          await supabase.from('tutoriels').update({ pdf_url: pdfUrl }).eq('id', tutoId)
+        } catch (err) {
+          alert('Le PDF n\'a pas pu être généré : ' + err.message)
+        }
+        setGenerationPdf(false)
+      }
     }
 
     setFormulaireOuvert(false)
@@ -374,6 +406,16 @@ function AdminTutoriels() {
             <label className="block text-xs mb-1 font-medium" style={labelStyle}>Contenu</label>
             <EditeurTexte contenu={form.contenu} onChange={html => setForm({ ...form, contenu: html })} />
           </div>
+
+          {categories.length > 0 && (
+            <SelectMultiple
+              label="Catégories"
+              options={categories}
+              selectionnes={form.categoriesSelectionnees}
+              onToggle={toggleCategorie}
+              afficherPrix={false}
+            />
+          )}
 
           <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: '#EDD98A' }}>
             <input type="checkbox" checked={form.gratuit} onChange={e => setForm({ ...form, gratuit: e.target.checked })} />
