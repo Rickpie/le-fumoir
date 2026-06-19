@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePanier } from '../context/PanierContext'
 import { useAuth } from '../context/AuthContext'
@@ -10,6 +10,15 @@ function Panier() {
   const navigate = useNavigate()
   const [chargementPaiement, setChargementPaiement] = useState(false)
   const [erreurPaiement, setErreurPaiement] = useState('')
+  const [fraisCommande, setFraisCommande] = useState([])
+
+  useEffect(() => {
+    supabase.from('config_calculateur').select('label, valeur, unite').eq('type', 'commande').order('ordre')
+      .then(({ data }) => setFraisCommande((data || []).filter(f => parseFloat(f.valeur) > 0)))
+  }, [])
+
+  const totalFrais = fraisCommande.reduce((s, f) => s + parseFloat(f.valeur), 0)
+  const totalAvecFrais = total + totalFrais
 
   async function passerCommande() {
     if (!utilisateur) {
@@ -33,6 +42,7 @@ function Panier() {
             epices: item.epices || [],
             inserts: item.inserts || [],
           })),
+          frais: fraisCommande.map(f => ({ label: f.label, valeur: parseFloat(f.valeur) })),
           siteUrl: window.location.origin,
         },
       })
@@ -78,13 +88,13 @@ function Panier() {
                 {item.mode_realisation === 'soi-meme' ? 'À faire soi-même' : 'Réalisé par l\'artisan'}
               </p>
 
-              {item.epices.length > 0 && (
+              {(item.epices || []).length > 0 && (
                 <p className="text-xs mt-1" style={{ color: '#FFFFFF' }}>
                   Épices : {item.epices.map(e => e.nom).join(', ')}
                 </p>
               )}
 
-              {item.inserts.length > 0 && (
+              {(item.inserts || []).length > 0 && (
                 <p className="text-xs mt-1" style={{ color: '#FFFFFF' }}>
                   Inserts : {item.inserts.map(i => i.nom).join(', ')}
                 </p>
@@ -113,8 +123,23 @@ function Panier() {
       </div>
 
       <div className="rounded-xl p-4 mb-4 flex flex-col gap-3" style={{ background: '#2C2518', border: '1px solid #4A3820' }}>
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold" style={{ color: '#EDD98A' }}>Total : {total.toFixed(2)} €</span>
+        {/* Sous-total produits */}
+        <div className="flex justify-between text-sm" style={{ color: '#FFFFFF' }}>
+          <span>Sous-total</span>
+          <span>{total.toFixed(2)} €</span>
+        </div>
+
+        {/* Frais à la commande */}
+        {fraisCommande.map((f, i) => (
+          <div key={i} className="flex justify-between text-sm" style={{ color: '#FFFFFF' }}>
+            <span>{f.label}</span>
+            <span>{parseFloat(f.valeur).toFixed(2)} €</span>
+          </div>
+        ))}
+
+        {/* Séparateur + Total */}
+        <div className="pt-3 border-t flex items-center justify-between" style={{ borderColor: '#4A3820' }}>
+          <span className="text-lg font-semibold" style={{ color: '#EDD98A' }}>Total : {totalAvecFrais.toFixed(2)} €</span>
           <button
             onClick={passerCommande}
             disabled={chargementPaiement}
@@ -123,6 +148,7 @@ function Panier() {
             {chargementPaiement ? 'Redirection...' : '💳 Passer la commande'}
           </button>
         </div>
+
         {erreurPaiement && (
           <p className="text-xs" style={{ color: '#B03A2E' }}>{erreurPaiement}</p>
         )}

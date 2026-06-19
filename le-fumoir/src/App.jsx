@@ -42,6 +42,9 @@ import AdminPromos from './pages/admin/AdminPromos'
 import AdminAvis from './pages/admin/AdminAvis'
 import AdminFAQ from './pages/admin/AdminFAQ'
 import AdminCategoriesTutoriels from './pages/admin/AdminCategoriesTutoriels'
+import AdminCalculateur from './pages/admin/AdminCalculateur'
+import AdminCalculateurConfig from './pages/admin/AdminCalculateurConfig'
+import AdminReferentiel from './pages/admin/AdminReferentiel'
 
 
 function App() {
@@ -95,6 +98,9 @@ function App() {
           <Route path="avis" element={<AdminAvis />} />
           <Route path="faq" element={<AdminFAQ />} />
           <Route path="categories-tutoriels" element={<AdminCategoriesTutoriels />} />
+          <Route path="calculateur" element={<AdminCalculateur />} />
+          <Route path="calculateur-config" element={<AdminCalculateurConfig />} />
+          <Route path="referentiel" element={<AdminReferentiel />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

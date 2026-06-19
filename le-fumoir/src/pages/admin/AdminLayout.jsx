@@ -31,7 +31,6 @@ const adminNav = [
   {
     groupe: 'Configuration ventes',
     items: [
-      { path: '/admin/categories', label: 'Catégories boutique', icon: '🏷️' },
       { path: '/admin/categories-tutoriels', label: 'Catégories tutoriels', icon: '🏷️' },
       { path: '/admin/options', label: 'Épices & Inserts', icon: '🧂' },
       { path: '/admin/packs', label: 'Packs', icon: '🎁' },
@@ -52,6 +51,14 @@ const adminNav = [
       { path: '/admin/clients', label: 'Clients', icon: '👥' },
       { path: '/admin/avis', label: 'Avis clients', icon: '⭐' },
       { path: '/admin/promos', label: 'Codes promo', icon: '🎟️' },
+    ],
+  },
+  {
+    groupe: 'Tarification',
+    items: [
+      { path: '/admin/calculateur', label: 'Calculatrice', icon: '🧮' },
+      { path: '/admin/referentiel', label: 'Référentiel', icon: '📊' },
+      { path: '/admin/calculateur-config', label: 'Config frais', icon: '⚙️' },
     ],
   },
 ]

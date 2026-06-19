@@ -48,9 +48,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { items, siteUrl } = await req.json()
+    const { items, frais = [], siteUrl } = await req.json()
 
-    // Construire les lignes Stripe
+    // Construire les lignes Stripe (produits)
     const lineItems = items.map((item: any) => ({
       price_data: {
         currency: 'eur',
@@ -63,17 +63,37 @@ Deno.serve(async (req) => {
       quantity: item.quantite ?? 1,
     }))
 
-    const total = items.reduce(
+    // Ajouter les frais commande comme lignes Stripe séparées
+    for (const f of frais) {
+      if ((f.valeur ?? 0) > 0) {
+        lineItems.push({
+          price_data: {
+            currency: 'eur',
+            product_data: { name: f.label },
+            unit_amount: Math.round(f.valeur * 100),
+          },
+          quantity: 1,
+        })
+      }
+    }
+
+    const totalProduits = items.reduce(
       (sum: number, item: any) => sum + (item.prix_unitaire ?? 0) * (item.quantite ?? 1),
       0
     )
+    const totalFrais = frais.reduce((sum: number, f: any) => sum + (f.valeur ?? 0), 0)
+    const total = totalProduits + totalFrais
 
     // Créer la commande en base (statut en_attente)
+    const lignesAvecFrais = [
+      ...items,
+      ...frais.map((f: any) => ({ type: 'frais', nom: f.label, prix_unitaire: f.valeur, quantite: 1 })),
+    ]
     const { data: commande } = await supabase
       .from('commandes')
       .insert({
         profil_id: userId,
-        lignes: items,
+        lignes: lignesAvecFrais,
         total: parseFloat(total.toFixed(2)),
         statut: 'en_attente',
         adresse_livraison: adresseLivraison,

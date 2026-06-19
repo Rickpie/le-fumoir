@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { usePanier } from '../context/PanierContext'
 
+
 function ProduitDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -12,6 +13,7 @@ function ProduitDetail() {
   const [epices, setEpices] = useState([])
   const [inserts, setInserts] = useState([])
   const [chargement, setChargement] = useState(true)
+  const [tauxHoraire, setTauxHoraire] = useState(0)
 
   const [modeRealisation, setModeRealisation] = useState('soi-meme')
   const [epicesSlots, setEpicesSlots] = useState([''])
@@ -24,23 +26,28 @@ function ProduitDetail() {
   }, [id])
 
   async function chargerProduit() {
-    const { data: p } = await supabase
-      .from('produits')
-      .select('*, categories(nom, delai_preparation, cout_preparation)')
-      .eq('id', id)
-      .single()
-    const { data: pe } = await supabase
-      .from('produit_epices')
-      .select('epice_id, epices:epice_id (id, nom, prix_supplement, visible)')
-      .eq('produit_id', id)
-    const { data: pi } = await supabase
-      .from('produit_inserts')
-      .select('insert_id, inserts:insert_id (id, nom, prix_supplement, visible)')
-      .eq('produit_id', id)
+    const [
+      { data: p },
+      { data: pe },
+      { data: pi },
+      { data: cfg },
+    ] = await Promise.all([
+      supabase.from('produits')
+        .select('*, categories(nom, delai_preparation, cout_preparation, est_viande), morceaux(temps_prep_min)')
+        .eq('id', id).single(),
+      supabase.from('produit_epices')
+        .select('epice_id, epices:epice_id (id, nom, prix_supplement, visible)')
+        .eq('produit_id', id),
+      supabase.from('produit_inserts')
+        .select('insert_id, inserts:insert_id (id, nom, prix_supplement, visible)')
+        .eq('produit_id', id),
+      supabase.from('config_calculateur').select('valeur').eq('cle', 'taux_horaire').single(),
+    ])
 
     setProduit(p)
     setEpices((pe || []).map(x => x.epices).filter(e => e?.visible))
     setInserts((pi || []).map(x => x.inserts).filter(i => i?.visible))
+    setTauxHoraire(parseFloat(cfg?.valeur || 0))
     setChargement(false)
   }
 
@@ -71,16 +78,18 @@ function ProduitDetail() {
 
   const supplementInserts = insertsChoisis.reduce((sum, x) => sum + (parseFloat(x.prix_supplement) || 0), 0)
 
-  const coutPreparation = modeRealisation === 'artisan'
-    ? parseFloat(produit?.categories?.cout_preparation || 0)
-    : 0
+  const tempsPrepMin = produit?.morceaux?.temps_prep_min || 0
+  const coutPreparationBase = tempsPrepMin > 0 && tauxHoraire > 0
+    ? (tempsPrepMin / 60) * tauxHoraire
+    : parseFloat(produit?.categories?.cout_preparation || 0)
+
+  const coutPreparation = modeRealisation === 'artisan' ? coutPreparationBase : 0
 
   const prixBase = produit ? parseFloat(produit.prix) : 0
   const prixUnitaire = prixBase + supplementEpices + supplementInserts + coutPreparation
   const prixTotal = prixUnitaire * quantite
 
   const delai = produit?.categories?.delai_preparation
-  const coutPreparationCategorie = parseFloat(produit?.categories?.cout_preparation || 0)
 
   function handleAjouterPanier() {
     const epicesChoisies = epicesSelectionnees
@@ -137,23 +146,32 @@ function ProduitDetail() {
 
         <h1 className="text-2xl font-medium mb-2" style={{ color: '#EDD98A' }}>{produit.nom}</h1>
         {produit.description && (
-          <p className="text-sm mb-6" style={{ color: '#FFFFFF' }}>{produit.description}</p>
+          <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>{produit.description}</p>
+        )}
+        {produit.categories?.est_viande && (
+          <div className="flex items-start gap-2 mb-6 p-3 rounded-lg" style={{ background: 'rgba(240,180,41,0.08)', border: '1px solid rgba(240,180,41,0.2)' }}>
+            <span style={{ fontSize: '1rem', lineHeight: '1.4' }}>⚖️</span>
+            <p className="text-xs" style={{ color: '#EDD98A', lineHeight: '1.5' }}>
+              Sur 1 kg de viande achetée, comptez une perte d'environ 30 à 35% du poids après séchage.
+              Si vous optez pour la version <strong>à faire sécher vous-même</strong>, vous recevrez la pièce brute (poids plein).
+            </p>
+          </div>
         )}
 
         <div className="border-t mb-6" style={{ borderColor: '#4A3820' }} />
 
-        {/* Mode de séchage */}
+        {/* Mode de réalisation */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2" style={{ color: '#EDD98A' }}>Mode de séchage souhaité</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#EDD98A' }}>Mode de réception souhaité</label>
           <div className="flex flex-col gap-2">
-            <button onClick={() => setModeSechage('soi-meme')}
+            <button onClick={() => setModeRealisation('soi-meme')}
               className="w-full px-3 py-2.5 rounded-lg text-sm font-medium text-left"
               style={modeRealisation === 'soi-meme'
                 ? { background: '#F0B429', color: '#1E1912' }
                 : { background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
               À faire sécher soi-même
             </button>
-            <button onClick={() => setModeSechage('artisan')}
+            <button onClick={() => setModeRealisation('artisan')}
               className="w-full px-3 py-2.5 rounded-lg text-sm font-medium text-left flex items-center justify-between"
               style={modeRealisation === 'artisan'
                 ? { background: '#F0B429', color: '#1E1912' }
@@ -162,10 +180,10 @@ function ProduitDetail() {
                 Réalisé avant l'envoi
                 {delai && <span className="ml-1 text-xs opacity-75">— délai : {delai}</span>}
               </span>
-              {coutPreparationCategorie > 0 && (
+              {coutPreparationBase > 0 && (
                 <span className="text-xs font-semibold ml-2"
                   style={{ color: modeRealisation === 'artisan' ? '#1E1912' : '#F0B429' }}>
-                  +{coutPreparationCategorie.toFixed(2)} €
+                  +{coutPreparationBase.toFixed(2)} €
                 </span>
               )}
             </button>

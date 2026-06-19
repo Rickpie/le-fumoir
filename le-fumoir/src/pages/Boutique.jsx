@@ -25,7 +25,7 @@ function Boutique() {
 
     const { data: prods } = await supabase
       .from('produits')
-      .select('*')
+      .select('*, categories(est_viande)')
       .eq('visible', true)
 
     const categoriesAvecProduits = (cats || []).filter(cat =>
@@ -198,11 +198,16 @@ function Boutique() {
               <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-semibold text-sm mb-1 leading-snug" style={{ color: '#EDD98A' }}>{produit.nom}</h3>
                 {produit.description && (
-                  <p className="text-xs line-clamp-2 flex-1" style={{ color: '#FFFFFF' }}>
+                  <p className="text-xs line-clamp-2" style={{ color: '#FFFFFF' }}>
                     {produit.description}
                   </p>
                 )}
-                <div className="flex items-end justify-between mt-4 pt-3" style={{ borderTop: '1px solid #4A3820' }}>
+                {produit.categories?.est_viande && (
+                  <p className="text-xs mt-2 flex-1" style={{ color: '#7A6A50' }}>
+                    ⚖️ La viande perd environ 30% de son poids en séchant — prévoyez en conséquence.
+                  </p>
+                )}
+                <div className="flex items-end justify-between mt-3 pt-3" style={{ borderTop: '1px solid #4A3820' }}>
                   <div>
                     <p className="text-xs mb-0.5" style={{ color: '#FFFFFF' }}>à partir de</p>
                     <p className="text-lg font-semibold leading-none" style={{ color: '#F0B429' }}>{produit.prix} €</p>
