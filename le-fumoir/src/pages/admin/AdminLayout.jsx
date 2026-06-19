@@ -15,6 +15,7 @@ const adminNav = [
       { path: '/admin/mise-en-vente', label: 'Mise en vente', icon: '🆕' },
       { path: '/admin/produits', label: 'Ventes en cours', icon: '🥩' },
       { path: '/admin/commandes', label: 'Commandes', icon: '📦' },
+      { path: '/admin/factures', label: 'Factures', icon: '🧾' },
       { path: '/admin/packs', label: 'Packs', icon: '🎁' },
     ],
   },
@@ -37,8 +38,9 @@ const adminNav = [
     ],
   },
   {
-    groupe: null,
+    groupe: 'Clients',
     items: [
+      { path: '/admin/clients', label: 'Clients', icon: '👥' },
       { path: '/admin/messages', label: 'Messages', icon: '📬', badge: true },
     ],
   },

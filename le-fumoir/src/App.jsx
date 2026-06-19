@@ -28,8 +28,13 @@ import AdminMessages from './pages/admin/AdminMessages'
 import AdminAccueil from './pages/admin/AdminAccueil'
 import AdminDocSechage from './pages/admin/AdminDocSechage'
 import AdminFacture from './pages/admin/AdminFacture'
+import AdminFactures from './pages/admin/AdminFactures'
 import AdminParametresFacturation from './pages/admin/AdminParametresFacturation'
+import AdminClients from './pages/admin/AdminClients'
+import PaiementSucces from './pages/PaiementSucces'
+import PaiementAnnule from './pages/PaiementAnnule'
 import Calculatrice from './pages/Calculatrice'
+import NotFound from './pages/NotFound'
 
 
 function App() {
@@ -49,6 +54,8 @@ function App() {
         <Route path="reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
         <Route path="profil" element={<Profil />} />
         <Route path="calculatrice" element={<Calculatrice />} />
+        <Route path="paiement-succes" element={<PaiementSucces />} />
+        <Route path="paiement-annule" element={<PaiementAnnule />} />
         <Route
           path="admin"
           element={
@@ -68,12 +75,15 @@ function App() {
           <Route path="fichiers" element={<AdminFichiers />} />
           <Route path="accueil" element={<AdminAccueil />} />
           <Route path="doc-sechage" element={<AdminDocSechage />} />
+          <Route path="factures" element={<AdminFactures />} />
           <Route path="facture/:commandeId" element={<AdminFacture />} />
           <Route path="parametres-facturation" element={<AdminParametresFacturation />} />
+          <Route path="clients" element={<AdminClients />} />
           <Route path="contact" element={<AdminContact />} />
           <Route path="messages" element={<AdminMessages />} />
         </Route>
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }

@@ -11,8 +11,7 @@ function AdminAccueil() {
 
   useEffect(() => {
     supabase.from('accueil_contenu').select('*')
-      .then(({ data, error }) => {
-        console.log('[AdminAccueil] toutes les lignes:', data, 'erreur:', error)
+      .then(({ data }) => {
         const lignes = data || []
         const ligneAvecContenu = lignes.find(r => r.contenu && r.contenu.trim().length > 0)
         const ligne = ligneAvecContenu || lignes[0] || null

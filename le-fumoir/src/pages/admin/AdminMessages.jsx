@@ -50,6 +50,11 @@ function AdminMessages() {
             <p className="text-xs mb-1" style={{ color: '#F0B429' }}>{m.email}</p>
             <p className="text-sm mb-3" style={{ color: '#EDD98A' }}>{m.message}</p>
             <div className="flex gap-2">
+              <a href={`mailto:${m.email}?subject=Re: votre message`}
+                className="text-xs px-2 py-1 rounded-md"
+                style={{ background: 'rgba(240,180,41,0.15)', color: '#F0B429', border: '1px solid rgba(240,180,41,0.3)' }}>
+                Répondre
+              </a>
               <button onClick={() => marquerLu(m.id, m.lu)} className="text-xs px-2 py-1 rounded-md"
                 style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
                 {m.lu ? 'Marquer non lu' : 'Marquer lu'}

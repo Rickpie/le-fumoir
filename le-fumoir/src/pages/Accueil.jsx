@@ -29,10 +29,8 @@ function Accueil() {
 
   useEffect(() => {
     supabase.from('accueil_contenu').select('*')
-      .then(({ data, error }) => {
-        console.log('[Accueil] toutes les lignes:', data, 'erreur:', error)
+      .then(({ data }) => {
         const ligne = (data || []).find(r => r.contenu && r.contenu.trim().length > 0)
-        console.log('[Accueil] ligne retenue:', ligne)
         setContenu(ligne?.contenu || '')
         setChargement(false)
       })

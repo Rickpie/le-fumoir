@@ -1,12 +1,14 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase'
+
+const FORM_VIDE = { nom: '', description: '', prix: '', fichier_url: '' }
 
 function AdminFichiers() {
   const [fichiers, setFichiers] = useState([])
   const [chargement, setChargement] = useState(true)
   const [enUpload, setEnUpload] = useState(false)
-
-  const [form, setForm] = useState({ nom: '', description: '', prix: '', fichier_url: '' })
+  const [editId, setEditId] = useState(null)
+  const [form, setForm] = useState(FORM_VIDE)
 
   useEffect(() => {
     chargerFichiers()
@@ -21,11 +23,9 @@ function AdminFichiers() {
   async function handleUploadFichier(e) {
     const fichier = e.target.files[0]
     if (!fichier) return
-
     setEnUpload(true)
     const nomFichier = `${Date.now()}_${fichier.name}`
     const { error } = await supabase.storage.from('photos-produits').upload(nomFichier, fichier)
-
     if (!error) {
       const { data } = supabase.storage.from('photos-produits').getPublicUrl(nomFichier)
       setForm(f => ({ ...f, fichier_url: data.publicUrl }))
@@ -35,19 +35,36 @@ function AdminFichiers() {
     setEnUpload(false)
   }
 
-  async function ajouterFichier(e) {
+  function commencerEdition(f) {
+    setEditId(f.id)
+    setForm({ nom: f.nom, description: f.description || '', prix: f.prix?.toString() || '', fichier_url: f.fichier_url || '' })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function annulerEdition() {
+    setEditId(null)
+    setForm(FORM_VIDE)
+  }
+
+  async function soumettre(e) {
     e.preventDefault()
     if (!form.nom || !form.fichier_url) {
       alert('Le nom et le fichier sont obligatoires')
       return
     }
-    await supabase.from('fichiers_telechargeables').insert({
+    const payload = {
       nom: form.nom,
       description: form.description,
       prix: parseFloat(form.prix) || 0,
       fichier_url: form.fichier_url,
-    })
-    setForm({ nom: '', description: '', prix: '', fichier_url: '' })
+    }
+    if (editId) {
+      await supabase.from('fichiers_telechargeables').update(payload).eq('id', editId)
+      setEditId(null)
+    } else {
+      await supabase.from('fichiers_telechargeables').insert(payload)
+    }
+    setForm(FORM_VIDE)
     chargerFichiers()
   }
 
@@ -59,6 +76,7 @@ function AdminFichiers() {
   async function supprimer(id) {
     if (!confirm('Supprimer définitivement ce fichier ?')) return
     await supabase.from('fichiers_telechargeables').delete().eq('id', id)
+    if (editId === id) annulerEdition()
     chargerFichiers()
   }
 
@@ -71,8 +89,14 @@ function AdminFichiers() {
     <div>
       <h2 className="text-lg font-medium mb-4" style={{ color: '#EDD98A' }}>📄 Fichiers téléchargeables</h2>
 
-      <form onSubmit={ajouterFichier} className="rounded-xl border p-4 mb-6 max-w-xl flex flex-col gap-3"
-        style={{ background: '#2C2518', borderColor: '#4A3820' }}>
+      <form onSubmit={soumettre} className="rounded-xl border p-4 mb-6 max-w-xl flex flex-col gap-3"
+        style={{ background: '#2C2518', borderColor: editId ? 'rgba(240,180,41,0.5)' : '#4A3820' }}>
+
+        {editId && (
+          <p className="text-xs font-semibold" style={{ color: '#F0B429' }}>
+            ✏️ Mode édition — modifie les champs puis enregistre
+          </p>
+        )}
 
         <div>
           <label className="block text-xs mb-1 font-medium" style={labelStyle}>Nom du fichier</label>
@@ -102,21 +126,38 @@ function AdminFichiers() {
           </label>
         </div>
 
-        <button type="submit" className="px-4 py-2 rounded-lg text-sm font-semibold self-start"
-          style={{ background: '#F0B429', color: '#1E1912' }}>
-          Ajouter le fichier
-        </button>
+        <div className="flex gap-2">
+          <button type="submit" className="px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{ background: '#F0B429', color: '#1E1912' }}>
+            {editId ? 'Enregistrer les modifications' : 'Ajouter le fichier'}
+          </button>
+          {editId && (
+            <button type="button" onClick={annulerEdition}
+              className="px-4 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
+              Annuler
+            </button>
+          )}
+        </div>
       </form>
 
       <div className="flex flex-col gap-2 max-w-xl">
         {fichiers.map(f => (
           <div key={f.id} className="flex items-center justify-between rounded-lg p-3 border"
-            style={{ background: '#2C2518', borderColor: '#4A3820', opacity: f.visible ? 1 : 0.5 }}>
+            style={{
+              background: editId === f.id ? 'rgba(240,180,41,0.08)' : '#2C2518',
+              borderColor: editId === f.id ? 'rgba(240,180,41,0.4)' : '#4A3820',
+              opacity: f.visible ? 1 : 0.5,
+            }}>
             <div>
               <span className="text-sm font-medium" style={{ color: '#EDD98A' }}>{f.nom}</span>
               {f.prix > 0 && <span className="text-xs ml-2" style={{ color: '#F0B429' }}>{f.prix} €</span>}
             </div>
             <div className="flex gap-2">
+              <button onClick={() => commencerEdition(f)} className="text-xs px-2 py-1 rounded-md"
+                style={{ background: 'rgba(240,180,41,0.15)', color: '#F0B429', border: '1px solid rgba(240,180,41,0.3)' }}>
+                Éditer
+              </button>
               <button onClick={() => toggleVisibilite(f)} className="text-xs px-2 py-1 rounded-md"
                 style={{ background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
                 {f.visible ? 'Cacher' : 'Afficher'}

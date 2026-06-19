@@ -50,6 +50,10 @@ function AdminFacture() {
   }, [commandeId])
 
   async function initialiserFacture() {
+    try { await _initialiserFacture() } catch { setChargement(false) }
+  }
+
+  async function _initialiserFacture() {
     const { data: existante } = await supabase
       .from('factures').select('*').eq('commande_id', commandeId).maybeSingle()
 

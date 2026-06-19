@@ -13,7 +13,7 @@ function ProduitDetail() {
   const [inserts, setInserts] = useState([])
   const [chargement, setChargement] = useState(true)
 
-  const [modeSechage, setModeSechage] = useState('soi-meme')
+  const [modeRealisation, setModeRealisation] = useState('soi-meme')
   const [epicesSlots, setEpicesSlots] = useState([''])
   const [insertsChoisis, setInsertsChoisis] = useState([])
   const [quantite, setQuantite] = useState(1)
@@ -71,7 +71,7 @@ function ProduitDetail() {
 
   const supplementInserts = insertsChoisis.reduce((sum, x) => sum + (parseFloat(x.prix_supplement) || 0), 0)
 
-  const coutPreparation = modeSechage === 'artisan'
+  const coutPreparation = modeRealisation === 'artisan'
     ? parseFloat(produit?.categories?.cout_preparation || 0)
     : 0
 
@@ -94,7 +94,7 @@ function ProduitDetail() {
       photo_url: produit.photo_url,
       prix_unitaire: prixUnitaire,
       quantite,
-      mode_sechage: modeSechage,
+      mode_realisation: modeRealisation,
       epices: epicesChoisies,
       inserts: insertsChoisis,
     })
@@ -148,14 +148,14 @@ function ProduitDetail() {
           <div className="flex flex-col gap-2">
             <button onClick={() => setModeSechage('soi-meme')}
               className="w-full px-3 py-2.5 rounded-lg text-sm font-medium text-left"
-              style={modeSechage === 'soi-meme'
+              style={modeRealisation === 'soi-meme'
                 ? { background: '#F0B429', color: '#1E1912' }
                 : { background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
               À faire sécher soi-même
             </button>
             <button onClick={() => setModeSechage('artisan')}
               className="w-full px-3 py-2.5 rounded-lg text-sm font-medium text-left flex items-center justify-between"
-              style={modeSechage === 'artisan'
+              style={modeRealisation === 'artisan'
                 ? { background: '#F0B429', color: '#1E1912' }
                 : { background: '#1E1912', color: '#FFFFFF', border: '1px solid #4A3820' }}>
               <span>
@@ -164,7 +164,7 @@ function ProduitDetail() {
               </span>
               {coutPreparationCategorie > 0 && (
                 <span className="text-xs font-semibold ml-2"
-                  style={{ color: modeSechage === 'artisan' ? '#1E1912' : '#F0B429' }}>
+                  style={{ color: modeRealisation === 'artisan' ? '#1E1912' : '#F0B429' }}>
                   +{coutPreparationCategorie.toFixed(2)} €
                 </span>
               )}

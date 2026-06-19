@@ -30,12 +30,21 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function chargerProfil(userId) {
-    const { data } = await supabase
-      .from('profils')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    setProfil(data)
+    try {
+      const { data } = await supabase
+        .from('profils')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      if (data?.banni) {
+        await supabase.auth.signOut()
+        setProfil(null)
+        return
+      }
+      setProfil(data)
+    } catch {
+      setProfil(null)
+    }
   }
 
   async function seConnecter(email, motDePasse) {
@@ -46,11 +55,11 @@ export function AuthProvider({ children }) {
   async function sInscrire(email, motDePasse, infos) {
     const { data, error } = await supabase.auth.signUp({ email, password: motDePasse })
     if (!error && data.user) {
-      await supabase.from('profils').insert({
+      await supabase.from('profils').upsert({
         id: data.user.id,
         ...infos,
         role: 'client'
-      })
+      }, { onConflict: 'id' })
     }
     return { error }
   }

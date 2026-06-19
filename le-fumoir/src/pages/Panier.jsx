@@ -1,9 +1,52 @@
-﻿import { useNavigate } from 'react-router-dom'
+﻿import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { usePanier } from '../context/PanierContext'
+import { useAuth } from '../context/AuthContext'
+import { supabase } from '../supabase'
 
 function Panier() {
   const { items, retirerDuPanier, modifierQuantite, total } = usePanier()
+  const { utilisateur } = useAuth()
   const navigate = useNavigate()
+  const [chargementPaiement, setChargementPaiement] = useState(false)
+  const [erreurPaiement, setErreurPaiement] = useState('')
+
+  async function passerCommande() {
+    if (!utilisateur) {
+      navigate('/connexion')
+      return
+    }
+
+    setChargementPaiement(true)
+    setErreurPaiement('')
+
+    try {
+      const { data, error } = await supabase.functions.invoke('creer-session-paiement', {
+        body: {
+          items: items.map(item => ({
+            produit_id: item.produit_id,
+            nom: item.nom,
+            prix_unitaire: item.prix_unitaire,
+            quantite: item.quantite,
+            photo_url: item.photo_url || null,
+            mode_realisation: item.mode_realisation,
+            epices: item.epices || [],
+            inserts: item.inserts || [],
+          })),
+          siteUrl: window.location.origin,
+        },
+      })
+
+      if (error || !data?.url) {
+        throw new Error(error?.message || 'Impossible de créer la session de paiement')
+      }
+
+      window.location.href = data.url
+    } catch (err) {
+      setErreurPaiement("Une erreur est survenue. Veuillez réessayer.")
+      setChargementPaiement(false)
+    }
+  }
 
   if (items.length === 0) {
     return (
@@ -69,12 +112,25 @@ function Panier() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between p-4 rounded-xl mb-4" style={{ background: '#2C2518', border: '1px solid #4A3820' }}>
-        <span className="text-lg font-semibold" style={{ color: '#EDD98A' }}>Total : {total.toFixed(2)} €</span>
-        <button className="px-4 py-2 rounded-lg text-sm font-semibold"
-          style={{ background: '#F0B429', color: '#1E1912' }}>
-          Passer la commande
-        </button>
+      <div className="rounded-xl p-4 mb-4 flex flex-col gap-3" style={{ background: '#2C2518', border: '1px solid #4A3820' }}>
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-semibold" style={{ color: '#EDD98A' }}>Total : {total.toFixed(2)} €</span>
+          <button
+            onClick={passerCommande}
+            disabled={chargementPaiement}
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-opacity"
+            style={{ background: '#F0B429', color: '#1E1912', opacity: chargementPaiement ? 0.6 : 1 }}>
+            {chargementPaiement ? 'Redirection...' : '💳 Passer la commande'}
+          </button>
+        </div>
+        {erreurPaiement && (
+          <p className="text-xs" style={{ color: '#B03A2E' }}>{erreurPaiement}</p>
+        )}
+        {!utilisateur && (
+          <p className="text-xs" style={{ color: '#FFFFFF' }}>
+            Vous devez être <button onClick={() => navigate('/connexion')} style={{ color: '#F0B429', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>connecté</button> pour passer commande.
+          </p>
+        )}
       </div>
     </div>
   )

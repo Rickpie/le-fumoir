@@ -46,10 +46,12 @@ function UploadPhoto({ valeur, onChange }) {
         <img src={valeur} alt="Aperçu" className="w-24 h-24 object-cover rounded-lg mb-2 border" style={{ borderColor: '#d6bfa0' }} />
       )}
 
-      <div className="flex gap-2 flex-wrap">
-        <label className="text-xs px-3 py-2 rounded-lg font-medium cursor-pointer"
-          style={{ background: '#5a2e0e', color: '#fdf0d0' }}>
-          {enUpload ? 'Upload...' : '📤 Uploader une photo'}
+      <div className="flex gap-2 flex-wrap items-center">
+        <label className="text-xs px-3 py-2 rounded-lg font-medium cursor-pointer flex items-center gap-2"
+          style={{ background: '#5a2e0e', color: '#fdf0d0', opacity: enUpload ? 0.7 : 1, cursor: enUpload ? 'not-allowed' : 'pointer' }}>
+          {enUpload
+            ? <><span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Envoi en cours...</>
+            : '📤 Uploader une photo'}
           <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={enUpload} />
         </label>
 

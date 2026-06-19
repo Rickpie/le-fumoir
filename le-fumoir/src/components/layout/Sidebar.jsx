@@ -15,8 +15,11 @@ function Sidebar() {
   const navigate = useNavigate()
 
   async function handleDeconnexion() {
-    await seDeconnecter()
-    navigate('/')
+    try {
+      await seDeconnecter()
+    } finally {
+      navigate('/')
+    }
   }
 
   return (

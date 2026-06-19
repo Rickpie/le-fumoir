@@ -7,6 +7,7 @@ function Inscription() {
   const navigate = useNavigate()
   const [chargement, setChargement] = useState(false)
   const [erreur, setErreur] = useState('')
+  const [visible, setVisible] = useState(false)
   const [form, setForm] = useState({
     email: '',
     motDePasse: '',
@@ -75,8 +76,15 @@ function Inscription() {
 
         <div>
           <label className="block text-sm mb-1 font-medium" style={labelStyle}>Mot de passe</label>
-          <input name="motDePasse" type="password" value={form.motDePasse} onChange={handleChange} required
-            className="w-full px-3 py-2 rounded-lg border text-sm outline-none" style={inputStyle} />
+          <div className="relative">
+            <input name="motDePasse" type={visible ? 'text' : 'password'} value={form.motDePasse} onChange={handleChange} required
+              className="w-full px-3 py-2 rounded-lg border text-sm outline-none pr-10" style={inputStyle} />
+            <button type="button" onClick={() => setVisible(v => !v)} tabIndex={-1}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+              style={{ color: '#7A6A50', background: 'none', border: 'none', cursor: 'pointer' }}>
+              {visible ? 'Masquer' : 'Afficher'}
+            </button>
+          </div>
         </div>
 
         <div>

@@ -12,6 +12,6 @@ export function useVisiteur() {
       id = genererUUID()
       localStorage.setItem('visiteur_id', id)
     }
-    supabase.from('visites').insert({ visiteur_id: id }).then(() => {})
+    supabase.from('visites').insert({ visiteur_id: id })
   }, [])
 }

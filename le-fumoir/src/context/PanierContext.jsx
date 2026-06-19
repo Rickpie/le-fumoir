@@ -1,12 +1,26 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 const PanierContext = createContext()
 
+const CLE_STORAGE = 'lefumoir_panier'
+
+function lireStorage() {
+  try {
+    const raw = localStorage.getItem(CLE_STORAGE)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
 export function PanierProvider({ children }) {
-  const [items, setItems] = useState([])
+  const [items, setItems] = useState(() => lireStorage())
+
+  useEffect(() => {
+    localStorage.setItem(CLE_STORAGE, JSON.stringify(items))
+  }, [items])
 
   function ajouterAuPanier(item) {
-    // item = { id unique, produit_id, nom, prix_unitaire, quantite, epices: [], inserts: [], mode_realisation }
     setItems(prev => [...prev, item])
   }
 
@@ -16,6 +30,7 @@ export function PanierProvider({ children }) {
 
   function viderPanier() {
     setItems([])
+    localStorage.removeItem(CLE_STORAGE)
   }
 
   function modifierQuantite(idItem, quantite) {

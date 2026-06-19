@@ -36,13 +36,13 @@ function Admin() {
       supabase.from('produits').select('*', { count: 'exact', head: true }).eq('visible', true),
       supabase.from('tutoriels').select('*', { count: 'exact', head: true }).eq('visible', true),
       supabase.from('commandes').select('*', { count: 'exact', head: true }),
-      supabase.from('commandes').select('*', { count: 'exact', head: true }).eq('statut', 'payee'),
+      supabase.from('commandes').select('*', { count: 'exact', head: true }).eq('statut', 'confirmee'),
       supabase.from('profils').select('*', { count: 'exact', head: true }),
       supabase.from('messages_contact').select('*', { count: 'exact', head: true }).eq('lu', false),
       supabase.from('visites').select('visiteur_id', { count: 'exact', head: false }).then(res => ({
         count: new Set((res.data || []).map(r => r.visiteur_id)).size
       })),
-      supabase.from('produits').select('nom, clics').order('clics', { ascending: false }).limit(5),
+      Promise.resolve({ data: [] }),
     ])
 
     setStats({
