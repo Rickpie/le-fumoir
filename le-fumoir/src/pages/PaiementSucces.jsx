@@ -22,10 +22,10 @@ function PaiementSucces() {
         Paiement confirmé !
       </h1>
       <p className="text-base mb-2" style={{ color: '#FFFFFF' }}>
-        Merci pour votre commande. Vous allez recevoir un email de confirmation.
+        Merci pour votre commande. L'artisan vous contactera prochainement pour convenir des modalités.
       </p>
       <p className="text-sm mb-8" style={{ color: '#FFFFFF', opacity: 0.7 }}>
-        Si vous avez commandé un produit "à sécher soi-même", le guide de séchage vous sera envoyé par email.
+        Si vous avez commandé un produit "à sécher soi-même", les instructions vous seront transmises directement.
       </p>
 
       <div className="flex gap-3 justify-center">

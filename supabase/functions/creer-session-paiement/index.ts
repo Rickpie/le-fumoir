@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       ...items,
       ...frais.map((f: any) => ({ type: 'frais', nom: f.label, prix_unitaire: f.valeur, quantite: 1 })),
     ]
-    const { data: commande } = await supabase
+    const { data: commande, error: commandeError } = await supabase
       .from('commandes')
       .insert({
         profil_id: userId,
@@ -101,13 +101,16 @@ Deno.serve(async (req) => {
       .select()
       .single()
 
+    if (commandeError || !commande) {
+      throw new Error('Impossible de créer la commande en base : ' + (commandeError?.message ?? 'données nulles'))
+    }
+
     // Créer la session Stripe Checkout (capture manuelle : l'admin encaisse après validation)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       payment_intent_data: { capture_method: 'manual' },
-      allow_promotion_codes: true,
       success_url: `${siteUrl}/paiement-succes?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/paiement-annule`,
       customer_email: userEmail ?? undefined,

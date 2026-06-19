@@ -93,7 +93,8 @@ function AdminMiseEnVente() {
     }, 0)
 
     const totalTournee = configItems.filter(c => c.type === 'tournee').reduce((s, c) => s + parseFloat(c.valeur || 0), 0)
-    const fraisFixesPiece = totalTournee / 5
+    const nbPieces = configCalc['nb_pieces_tournee'] || 5
+    const fraisFixesPiece = nbPieces > 0 ? totalTournee / nbPieces : 0
     const coutMain = ((m.temps_prep_min || 0) / 60) * (configCalc['taux_horaire'] || 0)
     const marge = configCalc['marge_defaut'] || 30
 
@@ -146,7 +147,7 @@ function AdminMiseEnVente() {
       photo_url: form.photo_url,
       categorie_id: form.categorie_id,
       morceau_id: form.morceau_id || null,
-      profil_id: morceau?.profil_id || null,
+      visible: true,
     }
 
     const { data } = await supabase.from('produits').insert(payload).select().single()

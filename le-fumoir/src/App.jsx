@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom'
 import { useVisiteur } from './hooks/useVisiteur'
 import Layout from './components/layout/Layout'
 import RouteProtegee from './components/RouteProtegee'
-import AdminCategories from './pages/admin/AdminCategories'
 import Accueil from './pages/Accueil'
 import Boutique from './pages/Boutique'
 import Tutoriels from './pages/Tutoriels'
@@ -78,7 +77,6 @@ function App() {
         >
           <Route index element={<Admin />} />
           <Route path="options" element={<AdminOptions />} />
-          <Route path="categories" element={<AdminCategories />} />
           <Route path="mise-en-vente" element={<AdminMiseEnVente />} />
           <Route path="produits" element={<AdminProduits />} />
           <Route path="commandes" element={<AdminCommandesActives />} />

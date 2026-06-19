@@ -9,12 +9,16 @@ function AdminCalculateurConfig() {
   const [nouveauFrais, setNouveauFrais] = useState({ label: '', montant: '' })
   const [nouveauFraisCommande, setNouveauFraisCommande] = useState({ label: '', montant: '' })
   const [editFraisCommande, setEditFraisCommande] = useState({})
+  const [nbPiecesDefault, setNbPiecesDefault] = useState('5')
 
   useEffect(() => { charger() }, [])
 
   async function charger() {
     const { data } = await supabase.from('config_calculateur').select('*').order('ordre')
-    setConfig(data || [])
+    const items = data || []
+    setConfig(items)
+    const nbRow = items.find(c => c.cle === 'nb_pieces_tournee')
+    if (nbRow) setNbPiecesDefault(String(nbRow.valeur || 5))
     setChargement(false)
   }
 
@@ -24,13 +28,16 @@ function AdminCalculateurConfig() {
 
   async function sauvegarder() {
     setSauvegarde(true)
-    await Promise.all(
-      config.map(item =>
-        supabase.from('config_calculateur')
-          .update({ valeur: parseFloat(item.valeur) || 0 })
-          .eq('id', item.id)
-      )
+    const nb = parseFloat(nbPiecesDefault) || 5
+    const saves = config.map(item =>
+      supabase.from('config_calculateur')
+        .update({ valeur: parseFloat(item.valeur) || 0 })
+        .eq('id', item.id)
     )
+    await Promise.all(saves)
+    await supabase.from('config_calculateur')
+      .upsert({ cle: 'nb_pieces_tournee', valeur: nb, label: 'Pièces par défaut (mise en vente)', unite: 'pièces', type: 'general', supprimable: false },
+               { onConflict: 'cle' })
     setSauvegarde(false)
     setSucces(true)
     setTimeout(() => setSucces(false), 3000)
@@ -281,6 +288,24 @@ function AdminCalculateurConfig() {
                 + Ajouter
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Nombre de pièces par défaut */}
+        <div className="rounded-xl border p-4" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
+          <h3 className="text-sm font-semibold mb-1" style={{ color: '#F0B429' }}>Mise en vente — pièces par défaut</h3>
+          <p className="text-xs mb-3" style={{ color: '#7A6A50' }}>
+            Nombre de pièces supposées dans une tournée lors du calcul automatique du prix suggéré dans "Mise en vente".
+          </p>
+          <div className="flex items-center gap-3">
+            <input
+              type="number" min="1" step="1"
+              value={nbPiecesDefault}
+              onChange={e => setNbPiecesDefault(e.target.value)}
+              className="w-24 px-3 py-1.5 rounded-lg border text-sm outline-none text-right"
+              style={inputStyle}
+            />
+            <span className="text-xs" style={{ color: '#7A6A50' }}>pièces / tournée</span>
           </div>
         </div>
 

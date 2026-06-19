@@ -14,7 +14,7 @@ function AdminProduits() {
   const [produitEnEdition, setProduitEnEdition] = useState(null)
 
   const [form, setForm] = useState({
-    nom: '', description: '', prix: '', photo_url: '', categorie_id: '',
+    nom: '', description: '', prix: '', photo_url: '', categorie_id: '', morceau_id: '',
     epicesSelectionnees: [], insertsSelectionnes: [],
   })
 
@@ -51,6 +51,7 @@ function AdminProduits() {
       prix: produit.prix,
       photo_url: produit.photo_url || '',
       categorie_id: produit.categorie_id || '',
+      morceau_id: produit.morceau_id || '',
       epicesSelectionnees: (pe || []).map(e => e.epice_id),
       insertsSelectionnes: (pi || []).map(i => i.insert_id),
     })
@@ -83,6 +84,7 @@ function AdminProduits() {
       prix: parseFloat(form.prix) || 0,
       photo_url: form.photo_url,
       categorie_id: form.categorie_id || null,
+      morceau_id: form.morceau_id || null,
     }
 
     const produitId = produitEnEdition.id

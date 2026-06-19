@@ -40,7 +40,12 @@ function AdminClients() {
   }
 
   async function supprimerCompte(client) {
-    await supabase.from('profils').delete().eq('id', client.id)
+    const { data: { session } } = await supabase.auth.getSession()
+    const { error } = await supabase.functions.invoke('admin-supprimer-utilisateur', {
+      body: { userId: client.id },
+      headers: { Authorization: `Bearer ${session?.access_token}` },
+    })
+    if (error) { alert('Erreur lors de la suppression : ' + error.message); return }
     setClients(prev => prev.filter(c => c.id !== client.id))
     if (clientOuvert?.id === client.id) setClientOuvert(null)
     setConfirmation(null)
@@ -203,7 +208,7 @@ function AdminClients() {
               L'historique de ses commandes sera conservé mais anonymisé.
             </p>
             <p className="text-xs" style={{ color: '#FFFFFF', opacity: 0.7 }}>
-              Pour supprimer aussi l'accès à la connexion, retire l'utilisateur dans Supabase Dashboard → Authentication.
+              Le compte de connexion sera également supprimé. Cette action est irréversible.
             </p>
             <div className="flex gap-3">
               <button onClick={() => supprimerCompte(confirmation)}

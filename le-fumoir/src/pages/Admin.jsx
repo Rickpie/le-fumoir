@@ -26,11 +26,10 @@ function Admin() {
       { count: produitsActifs },
       { count: tutoriels },
       { count: commandes },
-      { count: ventesValidees },
+      { count: commandesConfirmees },
       { count: inscrits },
       { count: messagesNonLus },
-      { count: visiteursUniques },
-      { data: topProduits },
+      { count: visites },
     ] = await Promise.all([
       supabase.from('produits').select('*', { count: 'exact', head: true }),
       supabase.from('produits').select('*', { count: 'exact', head: true }).eq('visible', true),
@@ -39,10 +38,7 @@ function Admin() {
       supabase.from('commandes').select('*', { count: 'exact', head: true }).eq('statut', 'confirmee'),
       supabase.from('profils').select('*', { count: 'exact', head: true }),
       supabase.from('messages_contact').select('*', { count: 'exact', head: true }).eq('lu', false),
-      supabase.from('visites').select('visiteur_id', { count: 'exact', head: false }).then(res => ({
-        count: new Set((res.data || []).map(r => r.visiteur_id)).size
-      })),
-      Promise.resolve({ data: [] }),
+      supabase.from('visites').select('*', { count: 'exact', head: true }),
     ])
 
     setStats({
@@ -50,11 +46,10 @@ function Admin() {
       produitsActifs: produitsActifs || 0,
       tutoriels: tutoriels || 0,
       commandes: commandes || 0,
-      ventesValidees: ventesValidees || 0,
+      commandesConfirmees: commandesConfirmees || 0,
       inscrits: inscrits || 0,
       messagesNonLus: messagesNonLus || 0,
-      visiteursUniques: visiteursUniques || 0,
-      topProduits: topProduits || [],
+      visites: visites || 0,
     })
   }
 
@@ -71,7 +66,7 @@ function Admin() {
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FFFFFF' }}>Audience</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Visiteurs uniques" value={stats.visiteursUniques} sousTitre="depuis l'ouverture" />
+          <StatCard label="Visites enregistrées" value={stats.visites} sousTitre="depuis l'ouverture" />
           <StatCard label="Inscrits" value={stats.inscrits} sousTitre="comptes créés" />
           <StatCard label="Produits en vente" value={stats.produitsActifs} sousTitre={`${stats.produits} au total`} />
           <StatCard label="Tutoriels publiés" value={stats.tutoriels} />
@@ -83,28 +78,10 @@ function Admin() {
         <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FFFFFF' }}>Activité</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <StatCard label="Commandes totales" value={stats.commandes} accent="#EDD98A" />
-          <StatCard label="Ventes validées" value={stats.ventesValidees} accent="#6B8E4E" />
+          <StatCard label="Commandes confirmées" value={stats.commandesConfirmees} accent="#6B8E4E" />
           <StatCard label="Messages non lus" value={stats.messagesNonLus} accent={stats.messagesNonLus > 0 ? '#B03A2E' : '#EDD98A'} />
         </div>
       </div>
-
-      {/* Top produits par clics */}
-      {stats.topProduits.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FFFFFF' }}>Top produits consultés</p>
-          <div className="rounded-xl border overflow-hidden" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
-            {stats.topProduits.map((p, i) => (
-              <div key={p.nom} className="flex items-center justify-between px-4 py-3 border-b last:border-b-0" style={{ borderColor: '#4A3820' }}>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs w-5 text-center font-semibold" style={{ color: '#FFFFFF' }}>{i + 1}</span>
-                  <span className="text-sm" style={{ color: '#EDD98A' }}>{p.nom}</span>
-                </div>
-                <span className="text-sm font-semibold" style={{ color: '#F0B429' }}>{p.clics || 0} clics</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   )

@@ -137,6 +137,7 @@ function AdminReferentiel() {
       nom: editMorceau.nom,
       profil_id: editMorceau.profil_id || null,
       temps_prep_min: parseInt(editMorceau.temps_prep_min) || 0,
+      actif: editMorceau.actif !== false,
     }
     await supabase.from('morceaux').update(payload).eq('id', editMorceau.id)
     setMorceaux(prev => prev.map(m => m.id === editMorceau.id ? { ...m, ...payload } : m))
@@ -294,6 +295,8 @@ function AdminReferentiel() {
   const inputSm = { ...inputStyle, fontSize: '0.8rem', padding: '4px 8px' }
 
   const catsSorted = [...categories].sort((a, b) => (a.ordre || 0) - (b.ordre || 0) || a.nom.localeCompare(b.nom, 'fr'))
+  const viandeCats = catsSorted.filter(c => c.est_viande)
+  const autreCats = catsSorted.filter(c => !c.est_viande)
   const profilsSorted = [...profils].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
 
   return (
@@ -320,13 +323,13 @@ function AdminReferentiel() {
       {onglet === 'viandes' && (
         <div className="flex flex-col gap-3 max-w-3xl">
 
-          {catsSorted.length === 0 && (
+          {viandeCats.length === 0 && autreCats.length === 0 && (
             <p className="text-sm text-center py-8" style={{ color: '#7A6A50' }}>
               Aucune catégorie. Créez-en une ci-dessous (ex : Canard, Porc, Bœuf…)
             </p>
           )}
 
-          {catsSorted.map(cat => {
+          {viandeCats.map(cat => {
             const morceauxCat = morceaux.filter(m => m.categorie_id === cat.id).sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
             const isOpen = catOuverte.has(cat.id)
 
@@ -408,10 +411,21 @@ function AdminReferentiel() {
                                       className="flex-1 px-2 py-1 rounded border text-xs outline-none" style={inputStyle} />
                                     <span className="text-xs shrink-0" style={{ color: '#7A6A50' }}>min</span>
                                   </div>
+                                  <button type="button"
+                                    onClick={() => setEditMorceau(p => ({ ...p, actif: !(p.actif !== false) }))}
+                                    className="px-2 py-1 rounded text-xs font-medium"
+                                    style={editMorceau.actif !== false
+                                      ? { background: 'rgba(107,142,78,0.25)', color: '#6B8E4E', border: '1px solid rgba(107,142,78,0.5)' }
+                                      : { background: 'rgba(176,58,46,0.2)', color: '#E07060', border: '1px solid rgba(176,58,46,0.4)' }}>
+                                    {editMorceau.actif !== false ? 'Actif' : 'Inactif'}
+                                  </button>
                                 </div>
                               ) : (
                                 <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
-                                  <span className="text-sm font-medium" style={{ color: '#EDD98A' }}>{m.nom}</span>
+                                  <span className="text-sm font-medium" style={{ color: m.actif === false ? '#7A6A50' : '#EDD98A' }}>{m.nom}</span>
+                                  {m.actif === false && (
+                                    <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(176,58,46,0.15)', color: '#E07060', border: '1px solid rgba(176,58,46,0.3)' }}>désactivé</span>
+                                  )}
                                   {profilNom && (
                                     <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(240,180,41,0.15)', color: '#F0B429', border: '1px solid rgba(240,180,41,0.3)' }}>
                                       🔥 {profilNom}
@@ -434,7 +448,7 @@ function AdminReferentiel() {
                                 </div>
                               ) : (
                                 <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                  <button onClick={() => setEditMorceau({ id: m.id, nom: m.nom, profil_id: m.profil_id || '', temps_prep_min: m.temps_prep_min || '' })}
+                                  <button onClick={() => setEditMorceau({ id: m.id, nom: m.nom, profil_id: m.profil_id || '', temps_prep_min: m.temps_prep_min || '', actif: m.actif !== false })}
                                     className="text-xs px-2 py-1 rounded" style={{ background: '#2C2518', color: '#EDD98A' }}>✏️</button>
                                   <button onClick={() => supprimerMorceau(m.id)}
                                     className="text-xs px-2 py-1 rounded" style={{ background: '#2C2518', color: '#B03A2E' }}>🗑️</button>
@@ -591,6 +605,46 @@ function AdminReferentiel() {
             )
           })}
 
+          {autreCats.length > 0 && (
+            <div className="pt-3 mt-1 border-t" style={{ borderColor: '#4A3820' }}>
+              <p className="text-xs font-semibold mb-2" style={{ color: '#7A6A50' }}>Catégories boutique (sans morceaux)</p>
+              <div className="flex flex-col gap-1.5">
+                {autreCats.map(cat => (
+                  <div key={cat.id} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: '#2C2518', border: '1px solid #4A3820' }}>
+                    {editCat?.id === cat.id ? (
+                      <div className="flex-1 flex flex-wrap gap-2 items-center" onClick={e => e.stopPropagation()}>
+                        <input value={editCat.nom} onChange={e => setEditCat(p => ({ ...p, nom: e.target.value }))}
+                          className="flex-1 px-2 py-1 rounded border text-sm outline-none" style={inputStyle} placeholder="Nom" />
+                        <input type="number" value={editCat.ordre} onChange={e => setEditCat(p => ({ ...p, ordre: e.target.value }))}
+                          className="w-16 px-2 py-1 rounded border text-sm outline-none text-center" style={inputStyle} placeholder="Ordre" />
+                        <button type="button"
+                          onClick={() => setEditCat(p => ({ ...p, est_viande: !p.est_viande }))}
+                          className="text-xs px-2 py-1 rounded font-medium"
+                          style={editCat.est_viande
+                            ? { background: 'rgba(107,142,78,0.25)', color: '#6B8E4E', border: '1px solid rgba(107,142,78,0.5)' }
+                            : { background: 'rgba(176,58,46,0.2)', color: '#E07060', border: '1px solid rgba(176,58,46,0.4)' }}>
+                          🥩 Viande
+                        </button>
+                        <button onClick={sauvegarderCat} className="text-xs px-2 py-1 rounded" style={{ background: '#6B8E4E', color: '#fff' }}>✓</button>
+                        <button onClick={() => setEditCat(null)} className="text-xs px-2 py-1 rounded" style={{ background: '#3A2E1A', color: '#7A6A50' }}>✕</button>
+                      </div>
+                    ) : (
+                      <span className="flex-1 text-sm font-medium" style={{ color: '#EDD98A' }}>{cat.nom}</span>
+                    )}
+                    {editCat?.id !== cat.id && (
+                      <div className="flex gap-1">
+                        <button onClick={() => setEditCat({ id: cat.id, nom: cat.nom, ordre: cat.ordre || 0, est_viande: false })}
+                          className="text-xs px-2 py-1 rounded" style={{ background: '#3A2E1A', color: '#EDD98A' }}>✏️</button>
+                        <button onClick={() => supprimerCat(cat.id)}
+                          className="text-xs px-2 py-1 rounded" style={{ background: '#3A2E1A', color: '#B03A2E' }}>🗑️</button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Nouvelle catégorie */}
           <div className="flex gap-2 items-end mt-2">
             <div className="flex-1">
@@ -635,7 +689,8 @@ function AdminReferentiel() {
             const frais = (fraisParProfil[profil.id] || []).sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
             const isOpen = profilOuvert.has(profil.id)
             const nbMorceaux = morceaux.filter(m => m.profil_id === profil.id).length
-            const totalFrais = frais.reduce((s, f) => s + parseFloat(f.montant || 0), 0)
+            const totalFixe = frais.filter(f => f.type_calcul !== 'poids').reduce((s, f) => s + parseFloat(f.montant || 0), 0)
+            const nbFraisPoids = frais.filter(f => f.type_calcul === 'poids').length
 
             return (
               <div key={profil.id} className="rounded-xl border" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
@@ -651,7 +706,7 @@ function AdminReferentiel() {
                     <div className="flex-1 flex items-center gap-2">
                       <span className="font-semibold text-sm" style={{ color: '#EDD98A' }}>🔥 {profil.nom}</span>
                       <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#1E1912', color: '#7A6A50' }}>
-                        {frais.length} poste{frais.length !== 1 ? 's' : ''} · {totalFrais.toFixed(2)} €/pièce · {nbMorceaux} morceau{nbMorceaux !== 1 ? 'x' : ''}
+                        {frais.length} poste{frais.length !== 1 ? 's' : ''} · {totalFixe.toFixed(2)} €/pièce{nbFraisPoids > 0 ? ' +var.' : ''} · {nbMorceaux} morceau{nbMorceaux !== 1 ? 'x' : ''}
                       </span>
                     </div>
                   )}
@@ -711,7 +766,9 @@ function AdminReferentiel() {
                     {frais.length > 0 && (
                       <div className="flex justify-between items-center pt-2 mt-1 border-t" style={{ borderColor: '#4A3820' }}>
                         <span className="text-xs font-semibold" style={{ color: '#FFFFFF' }}>Total frais variables</span>
-                        <span className="text-sm font-bold" style={{ color: '#F0B429' }}>{totalFrais.toFixed(2)} €/pièce</span>
+                        <span className="text-sm font-bold" style={{ color: '#F0B429' }}>
+                          {totalFixe.toFixed(2)} €/pièce{nbFraisPoids > 0 ? ` + ${nbFraisPoids} frais €/kg` : ''}
+                        </span>
                       </div>
                     )}
 

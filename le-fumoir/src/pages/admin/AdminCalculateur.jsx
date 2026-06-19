@@ -1,8 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../../supabase'
 
-function avgArr(arr) { return arr.length > 0 ? arr.reduce((s, v) => s + v, 0) / arr.length : 0 }
-
 function Ligne({ label, valeur, color, bold }) {
   return (
     <div className="flex justify-between items-center py-1">
@@ -60,6 +58,7 @@ function AdminCalculateur() {
     cfgItems.forEach(c => { cfgMap[c.cle] = parseFloat(c.valeur) || 0 })
     setConfig(cfgMap)
     setTotalTourneeConfig(cfgItems.filter(c => c.type === 'tournee').reduce((s, c) => s + parseFloat(c.valeur || 0), 0))
+    if (cfgMap['nb_pieces_tournee']) setNbPieces(Math.round(cfgMap['nb_pieces_tournee']))
 
     setCategories(cats || [])
     setProfils(profs || [])
@@ -117,7 +116,7 @@ function AdminCalculateur() {
     const coutMain = ((morceau.temps_prep_min || 0) / 60) * tauxH
 
     const prixRevient = coutMatiere + fraisFixesPiece + totalVariables + coutMain
-    const prixConseille = prixRevient * (1 + (marge || 0) / 100)
+    const prixConseille = Math.ceil(prixRevient * (1 + (marge || 0) / 100))
 
     return {
       coutMatiere,
@@ -343,7 +342,7 @@ function AdminCalculateur() {
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t" style={{ borderColor: '#4A3820' }}>
                   <span className="text-base font-semibold" style={{ color: '#FFFFFF' }}>Prix conseillé</span>
-                  <span className="text-2xl font-bold" style={{ color: '#F0B429' }}>{calcul.prixConseille.toFixed(2)} €</span>
+                  <span className="text-2xl font-bold" style={{ color: '#F0B429' }}>{calcul.prixConseille} €</span>
                 </div>
                 </div>
             </div>
