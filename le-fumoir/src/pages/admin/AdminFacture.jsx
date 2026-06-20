@@ -64,7 +64,7 @@ function AdminFacture() {
     }
 
     const [{ data: commande }, { data: params }] = await Promise.all([
-      supabase.from('commandes').select('*, profils(prenom, nom, email)').eq('id', commandeId).single(),
+      supabase.from('commandes').select('*, profils(prenom, nom)').eq('id', commandeId).single(),
       supabase.from('parametres_facturation').select('*').limit(1).maybeSingle(),
     ])
 
@@ -83,7 +83,7 @@ function AdminFacture() {
       vendeur_telephone: params?.vendeur_telephone || '',
       client_nom: `${commande?.profils?.prenom || ''} ${commande?.profils?.nom || ''}`.trim(),
       client_adresse: '',
-      client_email: commande?.profils?.email || '',
+      client_email: '',
       lignes: (commande?.lignes || []).map(l => ({
         description: l.nom || '',
         quantite: l.quantite || 1,

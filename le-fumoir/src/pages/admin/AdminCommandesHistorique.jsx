@@ -37,7 +37,7 @@ function AdminCommandesHistorique() {
     const profilIds = [...new Set(rows.map(r => r.profil_id).filter(Boolean))]
     let profilsMap = {}
     if (profilIds.length > 0) {
-      const { data: profils } = await supabase.from('profils').select('id, prenom, nom, email').in('id', profilIds)
+      const { data: profils } = await supabase.from('profils').select('id, prenom, nom').in('id', profilIds)
       ;(profils || []).forEach(p => { profilsMap[p.id] = p })
     }
     setCommandes(rows.map(r => ({ ...r, profils: profilsMap[r.profil_id] || null })))
