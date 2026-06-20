@@ -221,6 +221,7 @@ function Tutoriels() {
   const [recherche, setRecherche] = useState('')
   const [toutesCategories, setToutesCategories] = useState([])
   const [categorieFiltre, setCategorieFiltre] = useState(null)
+  const [achatSuccesBanner, setAchatSuccesBanner] = useState(false)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { profil, utilisateur } = useAuth()
@@ -229,7 +230,10 @@ function Tutoriels() {
   useEffect(() => {
     chargerDonnees()
     if (searchParams.get('achat') === 'succes') {
-      window.history.replaceState({}, '', '/tutoriels')
+      setAchatSuccesBanner(true)
+      navigate('/tutoriels', { replace: true })
+      const t = setTimeout(() => setAchatSuccesBanner(false), 6000)
+      return () => clearTimeout(t)
     }
   }, [])
 
@@ -347,9 +351,6 @@ function Tutoriels() {
       <p style={{ color: '#FFFFFF' }}>Chargement...</p>
     </div>
   )
-
-  // Notif achat réussi
-  const achatSucces = searchParams.get('achat') === 'succes'
 
   // VUE DÉTAIL PACK
   if (packSelectionne) {
@@ -598,7 +599,7 @@ function Tutoriels() {
         </div>
       )}
 
-      {achatSucces && (
+      {achatSuccesBanner && (
         <div className="mb-6 p-4 rounded-xl flex items-center gap-3"
           style={{ background: 'rgba(107,142,78,0.15)', border: '1px solid rgba(107,142,78,0.3)' }}>
           <span className="text-xl">🎉</span>

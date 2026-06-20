@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabase'
 
 const STATUTS = {
-  en_attente:     { label: 'En attente',     couleur: '#EDD98A' },
+  autorisee:      { label: 'Autorisée',      couleur: '#A78BFA' },
   confirmee:      { label: 'Confirmée',      couleur: '#F0B429' },
   en_preparation: { label: 'En préparation', couleur: '#6B8E4E' },
   expediee:       { label: 'Expédiée',       couleur: '#4A90D9' },
@@ -115,7 +115,7 @@ function AdminFactures() {
                       {new Date(c.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </td>
                     <td className="px-3 py-2.5" style={{ color: '#FFFFFF' }}>
-                      {p ? `${p.prenom || ''} ${p.nom || ''}`.trim() || p.email : '—'}
+                      {p ? (`${p.prenom || ''} ${p.nom || ''}`.trim() || '—') : '—'}
                     </td>
                     <td className="px-3 py-2.5 font-semibold whitespace-nowrap" style={{ color: '#F0B429' }}>
                       {parseFloat(c.total || 0).toFixed(2)} €
