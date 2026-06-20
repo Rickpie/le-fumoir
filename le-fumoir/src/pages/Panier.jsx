@@ -11,13 +11,15 @@ function Panier() {
   const [chargementPaiement, setChargementPaiement] = useState(false)
   const [erreurPaiement, setErreurPaiement] = useState('')
   const [fraisCommande, setFraisCommande] = useState([])
+  const [modeRetrait, setModeRetrait] = useState('livraison')
 
   useEffect(() => {
     supabase.from('config_calculateur').select('label, valeur, unite').eq('type', 'commande').order('ordre')
       .then(({ data }) => setFraisCommande((data || []).filter(f => parseFloat(f.valeur) > 0)))
   }, [])
 
-  const totalFrais = fraisCommande.reduce((s, f) => s + parseFloat(f.valeur), 0)
+  const fraisActifs = modeRetrait === 'sur_place' ? [] : fraisCommande
+  const totalFrais = fraisActifs.reduce((s, f) => s + parseFloat(f.valeur), 0)
   const totalAvecFrais = total + totalFrais
 
   async function passerCommande() {
@@ -42,7 +44,8 @@ function Panier() {
             epices: item.epices || [],
             inserts: item.inserts || [],
           })),
-          frais: fraisCommande.map(f => ({ label: f.label, valeur: parseFloat(f.valeur) })),
+          frais: fraisActifs.map(f => ({ label: f.label, valeur: parseFloat(f.valeur) })),
+          modeRetrait,
           siteUrl: window.location.origin,
         },
       })
@@ -122,6 +125,38 @@ function Panier() {
         ))}
       </div>
 
+      {/* Toggle mode de retrait */}
+      <div className="rounded-xl p-4 mb-4" style={{ background: '#2C2518', border: '1px solid #4A3820' }}>
+        <p className="text-xs font-medium mb-3" style={{ color: '#EDD98A' }}>Mode de récupération</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setModeRetrait('livraison')}
+            className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: modeRetrait === 'livraison' ? '#F0B429' : '#1E1912',
+              color: modeRetrait === 'livraison' ? '#1E1912' : '#FFFFFF',
+              border: '1px solid #4A3820',
+            }}>
+            📦 Livraison
+          </button>
+          <button
+            onClick={() => setModeRetrait('sur_place')}
+            className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: modeRetrait === 'sur_place' ? '#F0B429' : '#1E1912',
+              color: modeRetrait === 'sur_place' ? '#1E1912' : '#FFFFFF',
+              border: '1px solid #4A3820',
+            }}>
+            🏪 Récupérer sur place
+          </button>
+        </div>
+        {modeRetrait === 'sur_place' && (
+          <p className="text-xs mt-2" style={{ color: '#FFFFFF' }}>
+            Récupération à notre atelier — frais de livraison offerts.
+          </p>
+        )}
+      </div>
+
       <div className="rounded-xl p-4 mb-4 flex flex-col gap-3" style={{ background: '#2C2518', border: '1px solid #4A3820' }}>
         {/* Sous-total produits */}
         <div className="flex justify-between text-sm" style={{ color: '#FFFFFF' }}>
@@ -130,7 +165,7 @@ function Panier() {
         </div>
 
         {/* Frais à la commande */}
-        {fraisCommande.map((f, i) => (
+        {fraisActifs.map((f, i) => (
           <div key={i} className="flex justify-between text-sm" style={{ color: '#FFFFFF' }}>
             <span>{f.label}</span>
             <span>{parseFloat(f.valeur).toFixed(2)} €</span>

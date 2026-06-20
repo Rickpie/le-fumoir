@@ -34,9 +34,13 @@ Deno.serve(async (req) => {
       userEmail = user?.email ?? null
     }
 
-    // Récupérer l'adresse de livraison du profil
+    const { items, frais = [], modeRetrait = 'livraison', siteUrl } = await req.json()
+
+    // Récupérer l'adresse de livraison du profil (sauf si récupération sur place)
     let adresseLivraison: string | null = null
-    if (userId) {
+    if (modeRetrait === 'sur_place') {
+      adresseLivraison = 'Récupération sur place'
+    } else if (userId) {
       const { data: profil } = await supabase
         .from('profils')
         .select('prenom, nom, adresse, code_postal')
@@ -47,8 +51,6 @@ Deno.serve(async (req) => {
         adresseLivraison = [nomComplet, profil.adresse, profil.code_postal].filter(Boolean).join(' — ')
       }
     }
-
-    const { items, frais = [], siteUrl } = await req.json()
 
     // Construire les lignes Stripe (produits)
     const lineItems = items.map((item: any) => ({
