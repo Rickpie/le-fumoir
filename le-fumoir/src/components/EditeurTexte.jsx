@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
+import Link from '@tiptap/extension-link'
 import { supabase } from '../supabase'
 
 
@@ -16,7 +17,7 @@ const COULEURS = [
 
 function EditeurTexte({ contenu, onChange }) {
   const editor = useEditor({
-    extensions: [StarterKit, Image, TextStyle, Color],
+    extensions: [StarterKit, Image, TextStyle, Color, Link.configure({ openOnClick: false })],
     content: contenu || '',
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
@@ -65,6 +66,18 @@ function EditeurTexte({ contenu, onChange }) {
         <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()}
           className="text-xs px-2 py-1 rounded-md" style={btnStyle(editor.isActive('bulletList'))}>
           Liste
+        </button>
+        <button type="button"
+          onClick={() => {
+            if (editor.isActive('link')) {
+              editor.chain().focus().unsetLink().run()
+            } else {
+              const url = prompt('URL du lien :')
+              if (url) editor.chain().focus().setLink({ href: url, target: '_blank' }).run()
+            }
+          }}
+          className="text-xs px-2 py-1 rounded-md" style={btnStyle(editor.isActive('link'))}>
+          {editor.isActive('link') ? 'Suppr. lien' : 'Lien'}
         </button>
 
         <div className="flex items-center gap-1 ml-1 pl-2" style={{ borderLeft: '1px solid #d6bfa0' }}>
