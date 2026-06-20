@@ -27,12 +27,18 @@ function AdminContact() {
   async function enregistrer() {
     setEnregistrement(true)
     setSucces(false)
-    const { error } = await supabase.from('contact_page').update({
-      contenu,
-      email_contact: emailContact,
-      updated_at: new Date().toISOString(),
-    }).eq('id', pageId)
-
+    let error
+    if (pageId) {
+      ;({ error } = await supabase.from('contact_page').update({
+        contenu,
+        email_contact: emailContact,
+        updated_at: new Date().toISOString(),
+      }).eq('id', pageId))
+    } else {
+      const { data, error: err } = await supabase.from('contact_page').insert({ contenu, email_contact: emailContact }).select().single()
+      error = err
+      if (data) setPageId(data.id)
+    }
     if (error) {
       alert('Erreur lors de l\'enregistrement : ' + error.message)
     } else {
