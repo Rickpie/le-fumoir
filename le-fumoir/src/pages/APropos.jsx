@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
 
 function APropos() {
@@ -84,10 +85,10 @@ function APropos() {
                   <p className="text-sm font-medium" style={{ color: '#EDD98A' }}>{item.titre}</p>
                   <p className="text-xs mt-0.5" style={{ color: '#FFFFFF' }}>{item.desc}</p>
                 </div>
-                <a href={item.lien} className="shrink-0 text-xs px-3 py-1.5 rounded-lg font-semibold"
+                <Link to={item.lien} className="shrink-0 text-xs px-3 py-1.5 rounded-lg font-semibold"
                   style={{ background: 'rgba(240,180,41,0.15)', color: '#F0B429', border: '1px solid rgba(240,180,41,0.3)', textDecoration: 'none' }}>
                   {item.label} →
-                </a>
+                </Link>
               </div>
             ))}
           </div>
@@ -96,10 +97,10 @@ function APropos() {
         {/* Contact CTA */}
         <div className="rounded-2xl border p-6 text-center" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
           <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>Une question ? Une commande spéciale ?</p>
-          <a href="/contact" className="inline-block px-5 py-2.5 rounded-xl text-sm font-semibold"
+          <Link to="/contact" className="inline-block px-5 py-2.5 rounded-xl text-sm font-semibold"
             style={{ background: '#F0B429', color: '#1E1912', textDecoration: 'none' }}>
             Me contacter →
-          </a>
+          </Link>
         </div>
       </div>
     </>

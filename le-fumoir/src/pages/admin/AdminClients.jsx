@@ -18,9 +18,7 @@ function AdminClients() {
     const { data } = await supabase
       .from('profils')
       .select('*, commandes(id)')
-      .eq('role', 'client')
-      .order('created_at', { ascending: false })
-    setClients(data || [])
+    setClients((data || []).filter(c => c.role !== 'admin'))
     setChargement(false)
   }
 
@@ -139,9 +137,6 @@ function AdminClients() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs" style={{ color: '#FFFFFF' }}>{nbCommandes} commande{nbCommandes !== 1 ? 's' : ''}</span>
-                    <span className="text-xs" style={{ color: '#FFFFFF' }}>
-                      {client.created_at ? new Date(client.created_at).toLocaleDateString('fr-FR') : '—'}
-                    </span>
                     <span style={{ color: '#FFFFFF' }}>{ouvert ? '▲' : '▼'}</span>
                   </div>
                 </button>

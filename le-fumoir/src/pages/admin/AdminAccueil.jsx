@@ -30,7 +30,7 @@ function AdminAccueil() {
       await supabase.from('accueil_contenu').update({ contenu, updated_at: new Date().toISOString() }).eq('id', pageId)
     } else {
       const { data } = await supabase.from('accueil_contenu').insert({ contenu }).select().single()
-      setPageId(data.id)
+      if (data) setPageId(data.id)
     }
     setSucces(true)
     setTimeout(() => setSucces(false), 3000)

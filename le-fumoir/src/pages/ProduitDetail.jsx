@@ -129,8 +129,8 @@ function ProduitDetail() {
       <SEO
         titre={`${produit.nom} — PC Le Fumoir`}
         description={produit.description ? produit.description.replace(/<[^>]*>/g, '').slice(0, 155) : `Découvrez ${produit.nom}, charcuterie artisanale fumée disponible sur commande chez PC Le Fumoir.`}
-        url={`/boutique/${produit.id}`}
-        image={produit.image_url || undefined}
+        url={`/produit/${produit.id}`}
+        image={produit.photo_url || undefined}
       />
       <button onClick={() => navigate('/boutique')}
         className="text-sm mb-6 flex items-center gap-1"

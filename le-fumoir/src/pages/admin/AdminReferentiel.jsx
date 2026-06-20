@@ -282,7 +282,7 @@ function AdminReferentiel() {
     }, 0)
 
     const totalTournee = configItems.filter(c => c.type === 'tournee').reduce((s, c) => s + parseFloat(c.valeur || 0), 0)
-    const fraisFixesPiece = totalTournee / 5
+    const fraisFixesPiece = totalTournee / (configCalc['nb_pieces_tournee'] || 5)
     const coutMain = ((m.temps_prep_min || 0) / 60) * (configCalc['taux_horaire'] || 0)
     const marge = configCalc['marge_defaut'] || 30
 

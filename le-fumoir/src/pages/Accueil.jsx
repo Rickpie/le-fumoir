@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../supabase'
 import SEO from '../components/SEO'
 
@@ -66,7 +67,7 @@ function Accueil() {
             Des viandes salées et fumées à la main, prêtes à déguster ou confiées à votre patience pour terminer le séchage chez vous.
           </p>
           <div className="accueil-cta anim anim-4">
-            <a href="/boutique" className="accueil-bouton">Découvrir la boutique</a>
+            <Link to="/boutique" className="accueil-bouton">Découvrir la boutique</Link>
           </div>
         </div>
       </div>

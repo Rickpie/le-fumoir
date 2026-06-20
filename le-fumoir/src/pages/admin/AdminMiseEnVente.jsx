@@ -139,7 +139,6 @@ function AdminMiseEnVente() {
       alert('Veuillez sélectionner une catégorie avant de publier.')
       return
     }
-    const morceau = morceaux.find(m => m.id === form.morceau_id)
     const payload = {
       nom: form.nom,
       description: form.description,

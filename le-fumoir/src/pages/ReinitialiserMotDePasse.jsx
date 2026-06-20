@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 
@@ -9,6 +9,12 @@ function ReinitialiserMotDePasse() {
   const [erreur, setErreur] = useState('')
   const [succes, setSucces] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!succes) return
+    const t = setTimeout(() => navigate('/'), 2000)
+    return () => clearTimeout(t)
+  }, [succes])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -31,7 +37,6 @@ function ReinitialiserMotDePasse() {
       setErreur(error.message)
     } else {
       setSucces(true)
-      setTimeout(() => navigate('/'), 2000)
     }
   }
 
