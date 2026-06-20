@@ -35,6 +35,9 @@ Deno.serve(async (req) => {
     if (!userId) {
       return new Response(JSON.stringify({ error: 'userId manquant' }), { status: 400, headers: corsHeaders })
     }
+    if (userId === caller.id) {
+      return new Response(JSON.stringify({ error: 'Impossible de supprimer son propre compte admin' }), { status: 400, headers: corsHeaders })
+    }
 
     // Supprimer le profil (les FK ON DELETE SET NULL/CASCADE s'occupent des commandes)
     await supabase.from('profils').delete().eq('id', userId)

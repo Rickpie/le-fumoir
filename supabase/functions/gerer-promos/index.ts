@@ -44,6 +44,13 @@ Deno.serve(async (req) => {
     if (action === 'creer') {
       const { code, type, valeur, description, max_utilisations } = body
 
+      if (!code || !valeur || valeur <= 0) {
+        return new Response(JSON.stringify({ error: 'Code et valeur requis (valeur > 0)' }), { status: 400, headers: corsHeaders })
+      }
+      if (type === 'percent' && valeur > 100) {
+        return new Response(JSON.stringify({ error: 'Pourcentage ne peut pas dépasser 100' }), { status: 400, headers: corsHeaders })
+      }
+
       const couponData: any = {
         duration: 'once',
         name: description || code,
