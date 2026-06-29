@@ -301,8 +301,6 @@ function AdminReferentiel() {
   const inputSm = { ...inputStyle, fontSize: '0.8rem', padding: '4px 8px' }
 
   const catsSorted = [...categories].sort((a, b) => (a.ordre || 0) - (b.ordre || 0) || a.nom.localeCompare(b.nom, 'fr'))
-  const viandeCats = catsSorted.filter(c => c.est_viande)
-  const autreCats = catsSorted.filter(c => !c.est_viande)
   const profilsSorted = [...profils].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
 
   return (
@@ -335,7 +333,7 @@ function AdminReferentiel() {
             </p>
           )}
 
-          {viandeCats.map(cat => {
+          {catsSorted.map(cat => {
             const morceauxCat = morceaux.filter(m => m.categorie_id === cat.id).sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
             const isOpen = catOuverte.has(cat.id)
 
@@ -617,53 +615,10 @@ function AdminReferentiel() {
             )
           })}
 
-          {autreCats.length > 0 && (
-            <div className="pt-3 mt-1 border-t" style={{ borderColor: '#4A3820' }}>
-              <p className="text-xs font-semibold mb-2" style={{ color: '#7A6A50' }}>Catégories boutique (sans morceaux)</p>
-              <div className="flex flex-col gap-1.5">
-                {autreCats.map(cat => (
-                  <div key={cat.id} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: '#2C2518', border: '1px solid #4A3820' }}>
-                    {editCat?.id === cat.id ? (
-                      <div className="flex-1 flex flex-wrap gap-2 items-center" onClick={e => e.stopPropagation()}>
-                        <input value={editCat.nom} onChange={e => setEditCat(p => ({ ...p, nom: e.target.value }))}
-                          className="flex-1 px-2 py-1 rounded border text-sm outline-none" style={inputStyle} placeholder="Nom" />
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs shrink-0" style={{ color: '#7A6A50' }}>Ordre</span>
-                          <input type="number" value={editCat.ordre} onChange={e => setEditCat(p => ({ ...p, ordre: e.target.value }))}
-                            className="w-14 px-2 py-1 rounded border text-sm outline-none text-center" style={inputStyle} />
-                        </div>
-                        <button type="button"
-                          onClick={() => setEditCat(p => ({ ...p, est_viande: !p.est_viande }))}
-                          className="text-xs px-2 py-1 rounded font-medium"
-                          style={editCat.est_viande
-                            ? { background: 'rgba(107,142,78,0.25)', color: '#6B8E4E', border: '1px solid rgba(107,142,78,0.5)' }
-                            : { background: 'rgba(176,58,46,0.2)', color: '#E07060', border: '1px solid rgba(176,58,46,0.4)' }}>
-                          🥩 Viande
-                        </button>
-                        <button onClick={sauvegarderCat} className="text-xs px-2 py-1 rounded" style={{ background: '#6B8E4E', color: '#fff' }}>✓</button>
-                        <button onClick={() => setEditCat(null)} className="text-xs px-2 py-1 rounded" style={{ background: '#3A2E1A', color: '#7A6A50' }}>✕</button>
-                      </div>
-                    ) : (
-                      <span className="flex-1 text-sm font-medium" style={{ color: '#EDD98A' }}>{cat.nom}</span>
-                    )}
-                    {editCat?.id !== cat.id && (
-                      <div className="flex gap-1">
-                        <button onClick={() => setEditCat({ id: cat.id, nom: cat.nom, ordre: cat.ordre || 0, est_viande: false })}
-                          className="text-xs px-2 py-1 rounded" style={{ background: '#3A2E1A', color: '#EDD98A' }}>✏️</button>
-                        <button onClick={() => supprimerCat(cat.id)}
-                          className="text-xs px-2 py-1 rounded" style={{ background: '#3A2E1A', color: '#B03A2E' }}>🗑️</button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Nouvelle catégorie */}
           <div className="flex gap-2 items-end mt-2">
             <div className="flex-1">
-              <label className="block text-xs mb-1" style={{ color: '#FFFFFF' }}>Nouvelle catégorie (Canard, Porc, Bœuf…)</label>
+              <label className="block text-xs mb-1" style={{ color: '#FFFFFF' }}>Nouvelle catégorie (Canard, Épicerie, Bœuf…)</label>
               <input placeholder="Nom"
                 value={nouvelleCat.nom}
                 onChange={e => setNouvelleCat(p => ({ ...p, nom: e.target.value }))}
