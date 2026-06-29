@@ -42,11 +42,11 @@ function Sidebar() {
   }
 
   return (
-    <aside className="w-48 min-h-screen flex flex-col border-r" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
+    <aside className="w-48 h-screen sticky top-0 flex flex-col border-r overflow-y-auto" style={{ background: '#2C2518', borderColor: '#4A3820' }}>
 
       {/* Logo */}
-      <Link to="/" className="px-4 py-5 border-b flex justify-center" style={{ borderColor: '#4A3820' }}>
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style={{ width: '120px', height: '120px' }}>
+      <Link to="/" className="px-4 py-3 border-b flex justify-center shrink-0" style={{ borderColor: '#4A3820' }}>
+        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style={{ width: '90px', height: '90px' }}>
           <circle cx="200" cy="200" r="185" fill="#2C2518" stroke="#F0B429" strokeWidth="6" />
           <circle cx="200" cy="200" r="170" fill="none" stroke="#F0B429" strokeWidth="1.5" />
           <text x="200" y="190" textAnchor="middle" fontFamily="Georgia, serif" fontSize="92" fontWeight="700" fill="#F0B429">PC</text>
