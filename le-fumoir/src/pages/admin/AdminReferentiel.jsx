@@ -327,7 +327,7 @@ function AdminReferentiel() {
       {onglet === 'viandes' && (
         <div className="flex flex-col gap-3 max-w-3xl">
 
-          {viandeCats.length === 0 && autreCats.length === 0 && (
+          {catsSorted.length === 0 && (
             <p className="text-sm text-center py-8" style={{ color: '#7A6A50' }}>
               Aucune catégorie. Créez-en une ci-dessous (ex : Canard, Porc, Bœuf…)
             </p>
